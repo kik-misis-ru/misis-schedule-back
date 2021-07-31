@@ -13,8 +13,7 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-client = pymongo.MongoClient('mongodb+srv://user615:passforuser615@cluster0.xtaai.mongodb.net/'
-                             'myFirstDatabase?retryWrites=true&w=majority')
+client = pymongo.MongoClient('')
 db = client.schedule
 
 app = FastAPI()
