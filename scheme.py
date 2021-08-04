@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     user_id: str
+    filial_id: str
     group_id: str
-    subgroup_id: str
-    eng_group: int
+    subgroup_name: str
+    eng_group: str
