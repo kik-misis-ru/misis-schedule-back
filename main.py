@@ -1,3 +1,4 @@
+from pydantic.types import Json
 import pymongo
 from bson import ObjectId
 from fastapi import FastAPI
@@ -5,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 from scheme import *
 import requests
-
+from motor.motor_asyncio import AsyncIOMotorClient
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -14,9 +15,13 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-client = pymongo.MongoClient('mongodb+srv://user615:passforuser615@cluster0.xtaai.mongodb.net/'
-                             'myFirstDatabase?retryWrites=true&w=majority')
-db = client.schedule
+url = 'mongodb+srv://user615:passforuser615@cluster0.xtaai.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+client = AsyncIOMotorClient(url)
+
+db = client.get_database("schedule")
+collection_schedule = db.get_collection("schedule")
+collection_users = db.get_collection("users")
+
 
 app = FastAPI()
 
@@ -28,15 +33,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-with open('schedule_test.json', 'r', encoding='utf-8') as f:
-    file = f.read()
-file = json.loads(file)
-
-filial_id = "808"
-group_id = "6156"
-room_id = None
-teacher_id = None
-start_date = '2021-05-10'
 
 # получение json файла с недельным расписанием для группы
 def get_json(data):
@@ -45,37 +41,49 @@ def get_json(data):
     return response
 
 
-@app.post('/schedule')
-async def insert_schedule_json(schedule):
-    _id = db.schedule.insert_one(schedule).inserted_id
-    return str(_id)
-
-
 @app.get('/schedule')
 async def get_schedule_json(group_id, date):
-    response = db.schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
+    print('1')
+    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
+    print('2')
     if response:
+        print("in db")
         return JSONEncoder().encode(response)
     else:
+        print("not in db")
         data = {
             'group': group_id,
             'start_date': date
         }
-        return get_json(data)
+        print('3')
+        sch = get_json(data)
+        print('4')
+        schedule_json = json.loads(sch)
+        collection_schedule.insert_one(schedule_json)
+        print('5')
+        return JSONEncoder().encode(schedule_json)
 
 
 @app.post('/users')
 async def add_user(user: User):
-    if db.users.find_one({"user_id": user.user_id}) is None:
-        _id = db.users.insert_one(dict(user)).inserted_id
+    if await collection_users.find_one({"user_id": user.user_id}) is None:
+        _id = await collection_users.insert_one(dict(user)).inserted_id
         return str(_id)
     else:
-        return "0"
+        collection_users.update_one({"user_id": user.user_id}, 
+        {"$set": 
+        {"filial_id": user.filial_id,
+        "group_id": user.group_id,
+        "subgroup_name": user.subgroup_name,
+        "eng_group": user.eng_group}
+        })
+
 
 @app.get('/users')
 async def get_user(user_id: str):
-    if db.users.find_one({"user_id": user_id}):
-        response = db.users.find_one({"user_id": user_id})
+    if await collection_users.find_one({"user_id": user_id}):
+        response = await collection_users.find_one({"user_id": user_id})
+        print("response", response)
         result = {}
         result["user_id"] = response["user_id"]
         result["filial_id"] = response["filial_id"]
@@ -85,3 +93,4 @@ async def get_user(user_id: str):
         return result
     else:
         return "0"
+

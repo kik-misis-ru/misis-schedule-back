@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class User(BaseModel):
     user_id: str
     filial_id: str
