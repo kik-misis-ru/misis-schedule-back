@@ -7,6 +7,7 @@ import json
 from scheme import *
 import requests
 from motor.motor_asyncio import AsyncIOMotorClient
+import time
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -43,13 +44,17 @@ def get_json(data):
 
 @app.get('/schedule')
 async def get_schedule_json(group_id, date):
+    in_db_start_time = time.time()
     print('1')
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
     print('2')
     if response:
         print("in db")
+        in_db_end_time = time.time()
+        print("IN DB", in_db_end_time - in_db_start_time)
         return JSONEncoder().encode(response)
     else:
+        not_in_db_start_time = time.time()
         print("not in db")
         data = {
             'group': group_id,
@@ -61,14 +66,15 @@ async def get_schedule_json(group_id, date):
         schedule_json = json.loads(sch)
         collection_schedule.insert_one(schedule_json)
         print('5')
+        not_in_db_end_time = time.time()
+        print("NOT IN DB", not_in_db_end_time - not_in_db_start_time)
         return JSONEncoder().encode(schedule_json)
 
 
 @app.post('/users')
 async def add_user(user: User):
     if await collection_users.find_one({"user_id": user.user_id}) is None:
-        _id = await collection_users.insert_one(dict(user)).inserted_id
-        return str(_id)
+        await collection_users.insert_one(dict(user))
     else:
         collection_users.update_one({"user_id": user.user_id}, 
         {"$set": 
@@ -83,7 +89,6 @@ async def add_user(user: User):
 async def get_user(user_id: str):
     if await collection_users.find_one({"user_id": user_id}):
         response = await collection_users.find_one({"user_id": user_id})
-        print("response", response)
         result = {}
         result["user_id"] = response["user_id"]
         result["filial_id"] = response["filial_id"]
