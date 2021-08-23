@@ -1,3 +1,6 @@
+from datetime import date
+
+from requests.sessions import should_bypass_proxies
 from pydantic.types import Json
 import pymongo
 from bson import ObjectId
@@ -8,6 +11,8 @@ from scheme import *
 import requests
 from motor.motor_asyncio import AsyncIOMotorClient
 import time
+import uvicorn
+from datetime import datetime
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -22,6 +27,7 @@ client = AsyncIOMotorClient(url)
 db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
 collection_users = db.get_collection("users")
+collection_schedule.create_index("createdAt", expireAfterSeconds= 86400)
 
 
 app = FastAPI()
@@ -48,6 +54,7 @@ async def get_schedule_json(group_id, date):
     print('1')
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
     print('2')
+    print(response)
     if response:
         print("in db")
         in_db_end_time = time.time()
@@ -62,19 +69,23 @@ async def get_schedule_json(group_id, date):
         }
         print('3')
         sch = get_json(data)
+        #print(sch)
         print('4')
         schedule_json = json.loads(sch)
-        collection_schedule.insert_one(schedule_json)
+        schedule_dict = dict(schedule_json)
+        schedule_dict["createdAt"] = datetime.utcnow()
+        collection_schedule.insert_one(schedule_dict)
         print('5')
         not_in_db_end_time = time.time()
         print("NOT IN DB", not_in_db_end_time - not_in_db_start_time)
         return JSONEncoder().encode(schedule_json)
 
 
+
 @app.post('/users')
 async def add_user(user: User):
     if await collection_users.find_one({"user_id": user.user_id}) is None:
-        await collection_users.insert_one(dict(user))
+        await collection_test.insert_one(dict(user))
     else:
         collection_users.update_one({"user_id": user.user_id}, 
         {"$set": 
