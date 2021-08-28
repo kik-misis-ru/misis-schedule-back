@@ -26,7 +26,7 @@ client = AsyncIOMotorClient(url)
 
 db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
-collection_schedule.create_index("createdAt", expireAfterSeconds= 30)
+collection_schedule.create_index("createdAt", expireAfterSeconds= 86400)
 collection_users = db.get_collection("users")
 
 
