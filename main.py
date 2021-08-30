@@ -11,8 +11,10 @@ from scheme import *
 import requests
 from motor.motor_asyncio import AsyncIOMotorClient
 import time
-import uvicorn
 from datetime import datetime
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -21,14 +23,18 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-url = 'mongodb+srv://user615:passforuser615@cluster0.xtaai.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+load_dotenv()
+env_path = Path('.')/'.env'
+load_dotenv(dotenv_path=env_path)
+
+url = os.getenv("MONGO_CONNECTION_STRING")
+print(url)
 client = AsyncIOMotorClient(url)
 
 db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
-collection_schedule.create_index("createdAt", expireAfterSeconds= 86400)
 collection_users = db.get_collection("users")
-
+collection_schedule.create_index("createdAt", expireAfterSeconds=86400)
 
 
 app = FastAPI()
@@ -55,7 +61,6 @@ async def get_schedule_json(group_id, date):
     print('1')
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
     print('2')
-    print(response)
     if response:
         print("in db")
         in_db_end_time = time.time()
