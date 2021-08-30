@@ -34,7 +34,7 @@ client = AsyncIOMotorClient(url)
 db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
 collection_users = db.get_collection("users")
-collection_schedule.create_index("createdAt", expireAfterSeconds= 86400)
+#collection_schedule.create_index("createdAt", expireAfterSeconds= 86400)
 
 
 app = FastAPI()
@@ -65,6 +65,7 @@ async def get_schedule_json(group_id, date):
         print("in db")
         in_db_end_time = time.time()
         print("IN DB", in_db_end_time - in_db_start_time)
+        response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
         not_in_db_start_time = time.time()
