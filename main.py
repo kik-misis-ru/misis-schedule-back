@@ -6,7 +6,7 @@ from scheme import *
 import requests
 from motor.motor_asyncio import AsyncIOMotorClient
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -29,7 +29,9 @@ client = AsyncIOMotorClient(url)
 
 db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
+collection_schedule_teacher = db.get_collection("schedule_teacher")
 collection_users = db.get_collection("users")
+
 
 app = FastAPI()
 
@@ -50,7 +52,9 @@ def get_json(data):
 
 
 @app.get('/schedule')
-async def get_schedule_json(group_id, date):
+async def get_schedule_json(group_id, dateStr):
+    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
+    date -= timedelta(date.isoweekday()-1)
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
     if response:
         response["createdAt"] = str(response["createdAt"])
@@ -66,6 +70,28 @@ async def get_schedule_json(group_id, date):
         schedule_dict["createdAt"] = datetime.utcnow()
         collection_schedule.insert_one(schedule_dict)
         return JSONEncoder().encode(schedule_json)
+
+@app.get("/schedule_teacher")
+async  def get_schedule_teacher_json(teacher_id, dateStr):
+    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
+    date -= timedelta(date.isoweekday()-1)
+    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(date)})
+    if response:
+        response["createdAt"] = str(response["createdAt"])
+        return JSONEncoder().encode(response)
+    else:
+        data = {
+            'teacher': teacher_id,
+            'start_date':date
+        }
+        sch = get_json(data)
+        print(1)
+        schedule_json = json.loads(sch)
+        schedule_dict = dict(schedule_json)
+        schedule_dict["createdAt"] = datetime.utcnow()
+        collection_schedule_teacher.insert_one(schedule_dict)
+        return JSONEncoder().encode(schedule_json)
+
 
 
 @app.post('/users')
