@@ -1,4 +1,3 @@
-from bson import ObjectId
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -10,13 +9,8 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+from utils import *
 
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
 
 
 load_dotenv()
@@ -31,6 +25,10 @@ db = client.get_database("schedule")
 collection_schedule = db.get_collection("schedule")
 collection_schedule_teacher = db.get_collection("schedule_teacher")
 collection_users = db.get_collection("users")
+collection_teachers = db.get_collection("teachers")
+
+
+
 
 
 app = FastAPI()
@@ -44,11 +42,6 @@ app.add_middleware(
 )
 
 
-# получение json файла с недельным расписанием для группы
-def get_json(data):
-    req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
-    response = json.dumps(req.json(), indent=2, ensure_ascii=False)
-    return response
 
 
 @app.get('/schedule')
@@ -121,3 +114,30 @@ async def get_user(user_id: str):
         return result
     else:
         return "0"
+
+
+@app.get('/teacher')
+async def get_teacher(teacher_initials):  
+    arr_initials = teacher_initials.split(' ')
+    if(len(arr_initials)!=3):
+        return "-1"
+    if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
+        return "-1"
+    last_name = arr_initials[0]
+    first_name = arr_initials[1][0]
+    mid_name = arr_initials[2][0]
+    teachers_db = await collection_teachers.find_one()
+    if teachers_db is None:
+        fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
+        response = FillTeachers(collection_teachers, fio)
+        return response
+    if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
+        response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+        response["createdAt"] = str(response["createdAt"])
+        return JSONEncoder().encode(response)
+    return "-1"
+    
+        
+
+
+
