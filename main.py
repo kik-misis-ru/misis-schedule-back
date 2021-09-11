@@ -113,7 +113,8 @@ async def get_user(user_id: str):
         result["group_id"] = response["group_id"]
         result["subgroup_name"] = response["subgroup_name"]
         result["eng_group"] = response["eng_group"]
-        result["teacher_id"]=response["teacher_id"]
+        if("teacher_id" in response):
+            result["teacher_id"]=response["teacher_id"]
         return result
     else:
         return "0"
