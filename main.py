@@ -115,6 +115,8 @@ async def get_user(user_id: str):
         result["eng_group"] = response["eng_group"]
         if("teacher_id" in response):
             result["teacher_id"]=response["teacher_id"]
+        else:
+            result["teacher_id"]=""
         return result
     else:
         return "0"
