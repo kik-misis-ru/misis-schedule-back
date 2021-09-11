@@ -125,10 +125,13 @@ async def get_user(user_id: str):
 @app.get('/teacher')
 async def get_teacher(teacher_initials):  
     arr_initials = teacher_initials.split(' ')
+    response = dict()
     if(len(arr_initials)!=3):
-        return "-2"
+        response['status']="-1"
+        return response
     if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
-        return "-2"
+        response['status']="-2"
+        return response
     last_name = arr_initials[0]
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
@@ -136,12 +139,15 @@ async def get_teacher(teacher_initials):
     if teachers_db is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
         response = FillTeachers(collection_teachers, fio)
+        response["status"]="1"
         return response
     if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
         response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+        response["status"]="1"
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
-    return "-1"
+    response["status"]="-1"
+    return response
     
         
 
