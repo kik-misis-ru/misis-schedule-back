@@ -32,13 +32,15 @@ def FillTeachers(collection_schedule_teacher, fio):
     filial_info_dict = dict(filial_info_json)
     teachers_info = filial_info_dict['response']['teachers']
     createdAt = datetime.utcnow()
-    response ="-1"
+    response = dict()
+    response['status']="-1"
     for teacher_info in teachers_info:
         teacher_info['createdAt'] = createdAt
         teacher_info['first_name']= teacher_info['first_name'][0]
         if teacher_info['mid_name'] is not None:
             teacher_info['mid_name']= teacher_info['mid_name'][0]
             if(teacher_info['last_name']==fio.last_name and  teacher_info['first_name']==fio.first_name and teacher_info['mid_name']== fio.mid_name):
-                response = str(teacher_info)
+                response = teacher_info
+                response["status"]="1"
     collection_schedule_teacher.insert_many(teachers_info)
     return response
