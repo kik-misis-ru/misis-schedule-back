@@ -111,6 +111,7 @@ async def get_user(user_id: str):
         result["group_id"] = response["group_id"]
         result["subgroup_name"] = response["subgroup_name"]
         result["eng_group"] = response["eng_group"]
+        result["teacher_id"]=response["teacher_id"]
         return result
     else:
         return "0"
@@ -120,9 +121,9 @@ async def get_user(user_id: str):
 async def get_teacher(teacher_initials):  
     arr_initials = teacher_initials.split(' ')
     if(len(arr_initials)!=3):
-        return "-1"
+        return "-2"
     if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
-        return "-1"
+        return "-2"
     last_name = arr_initials[0]
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
