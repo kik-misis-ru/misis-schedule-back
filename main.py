@@ -127,7 +127,7 @@ async def get_teacher(teacher_initials):
     arr_initials = teacher_initials.split(' ')
     response = dict()
     if(len(arr_initials)!=3):
-        response['status']="-1"
+        response['status']="-2"
         return response
     if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
         response['status']="-2"
@@ -139,7 +139,6 @@ async def get_teacher(teacher_initials):
     if teachers_db is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
         response = FillTeachers(collection_teachers, fio)
-        response["status"]="1"
         return response
     if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
         response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
