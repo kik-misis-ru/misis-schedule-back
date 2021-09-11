@@ -6,3 +6,8 @@ class User(BaseModel):
     group_id: str
     subgroup_name: str
     eng_group: str
+    
+class FIO(BaseModel):
+    last_name: str
+    first_name: str
+    mid_name: str
