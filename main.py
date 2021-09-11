@@ -97,7 +97,9 @@ async def add_user(user: User):
                                          {"filial_id": user.filial_id,
                                           "group_id": user.group_id,
                                           "subgroup_name": user.subgroup_name,
-                                          "eng_group": user.eng_group}
+                                          "eng_group": user.eng_group,
+                                          "teacher_id":user.teacher_id}
+
                                      })
 
 

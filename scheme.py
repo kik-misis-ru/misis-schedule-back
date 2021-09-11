@@ -6,6 +6,7 @@ class User(BaseModel):
     group_id: str
     subgroup_name: str
     eng_group: str
+    teacher_id: str
     
 class FIO(BaseModel):
     last_name: str
