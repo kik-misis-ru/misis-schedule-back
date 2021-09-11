@@ -45,19 +45,19 @@ app.add_middleware(
 
 
 @app.get('/schedule')
-async def get_schedule_json(group_id, dateStr):
-    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
-    date -= timedelta(date.isoweekday()-1)
-    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
+async def get_schedule_json(group_id, date):
+    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
+    dateDate -= timedelta(dateDate.isoweekday()-1)
+    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
         data = {
             'group': group_id,
-            'start_date': date
+            'start_date': dateDate
         }
-        sch = get_json(data)
+        sch = get_json(dateDate)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
         schedule_dict["createdAt"] = datetime.utcnow()
@@ -65,19 +65,19 @@ async def get_schedule_json(group_id, dateStr):
         return JSONEncoder().encode(schedule_json)
 
 @app.get("/schedule_teacher")
-async  def get_schedule_teacher_json(teacher_id, dateStr):
-    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
-    date -= timedelta(date.isoweekday()-1)
-    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(date)})
+async  def get_schedule_teacher_json(teacher_id, date):
+    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
+    dateDate -= timedelta(dateDate.isoweekday()-1)
+    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(dateDate)})
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
         data = {
             'teacher': teacher_id,
-            'start_date':date
+            'start_date':dateDate
         }
-        sch = get_json(data)
+        sch = get_json(dateDate)
         print(1)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
