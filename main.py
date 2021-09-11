@@ -57,7 +57,7 @@ async def get_schedule_json(group_id, date):
             'group': group_id,
             'start_date': dateDate
         }
-        sch = get_json(dateDate)
+        sch = get_json(data)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
         schedule_dict["createdAt"] = datetime.utcnow()
@@ -77,7 +77,7 @@ async  def get_schedule_teacher_json(teacher_id, date):
             'teacher': teacher_id,
             'start_date':dateDate
         }
-        sch = get_json(dateDate)
+        sch = get_json(data)
         print(1)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
