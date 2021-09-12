@@ -45,37 +45,38 @@ app.add_middleware(
 
 
 @app.get('/schedule')
-async def get_schedule_json(group_id, dateStr):
-    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
-    date -= timedelta(date.isoweekday()-1)
-    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date)})
+async def get_schedule_json(group_id, date):
+    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
+    dateDate -= timedelta(dateDate.isoweekday()-1)
+    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
         data = {
             'group': group_id,
-            'start_date': date
+            'start_date': dateDate
         }
         sch = get_json(data)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
+        schedule_dict = check_sub_groups(schedule_dict)
         schedule_dict["createdAt"] = datetime.utcnow()
         collection_schedule.insert_one(schedule_dict)
         return JSONEncoder().encode(schedule_json)
 
 @app.get("/schedule_teacher")
-async  def get_schedule_teacher_json(teacher_id, dateStr):
-    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
-    date -= timedelta(date.isoweekday()-1)
-    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(date)})
+async  def get_schedule_teacher_json(teacher_id, date):
+    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
+    dateDate -= timedelta(dateDate.isoweekday()-1)
+    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(dateDate)})
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
         data = {
             'teacher': teacher_id,
-            'start_date':date
+            'start_date':dateDate
         }
         sch = get_json(data)
         print(1)
@@ -97,7 +98,9 @@ async def add_user(user: User):
                                          {"filial_id": user.filial_id,
                                           "group_id": user.group_id,
                                           "subgroup_name": user.subgroup_name,
-                                          "eng_group": user.eng_group}
+                                          "eng_group": user.eng_group,
+                                          "teacher_id":user.teacher_id}
+
                                      })
 
 
@@ -111,31 +114,60 @@ async def get_user(user_id: str):
         result["group_id"] = response["group_id"]
         result["subgroup_name"] = response["subgroup_name"]
         result["eng_group"] = response["eng_group"]
+        if("teacher_id" in response):
+            result["teacher_id"]=response["teacher_id"]
+        else:
+            result["teacher_id"]=""
         return result
     else:
         return "0"
 
 
 @app.get('/teacher')
-async def get_teacher(teacher_initials):  
+async def get_teacher(teacher_initials): 
+    start_time = datetime.now() 
     arr_initials = teacher_initials.split(' ')
+    response = dict()
     if(len(arr_initials)!=3):
-        return "-1"
+        response['status']="-2"
+        return response
     if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
-        return "-1"
+        response['status']="-2"
+        return response
     last_name = arr_initials[0]
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
-    teachers_db = await collection_teachers.find_one()
-    if teachers_db is None:
+    count_rows = await collection_teachers.estimated_document_count()
+    if count_rows is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
-        response = FillTeachers(collection_teachers, fio)
+        response = fill_teachers(collection_teachers, fio=fio)
         return response
-    if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
-        response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+    teacher_from_db = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+    if teacher_from_db is not None:
+        response = teacher_from_db
+        response["status"]="1"
+        response["createdAt"] = str(response["createdAt"])
+        print(datetime.now() - start_time)
+        return JSONEncoder().encode(response)
+    response["status"]="-1"
+    return response
+
+@app.get("/teacher_initials")
+async def get_teacher_initials(teacher_id):
+    count_rows = await collection_teachers.estimated_document_count()
+    if count_rows is None:
+        response =fill_teachers(collection_teachers, id=teacher_id)
+        return response
+    teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
+    if teacher_from_db is not None:
+        response = teacher_from_db
+        response["status"]="1"
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
-    return "-1"
+    response = dict()
+    response["status"]="-1"
+    return response
+    
     
         
 
