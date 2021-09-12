@@ -49,7 +49,6 @@ async def get_schedule_json(group_id, date):
     dateDate = datetime.strptime(date, '%Y-%m-%d').date()
     dateDate -= timedelta(dateDate.isoweekday()-1)
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
-    schedule_dict = check_sub_groups(dict(response))
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
