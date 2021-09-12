@@ -54,6 +54,7 @@ def fill_teachers(collection_schedule_teacher, fio=None, Id=-1):
     return response
 
 def check_sub_groups(schedule_dict):
+    return schedule_dict
     subgroups =dict()
     schedule = schedule_dict["schedule"]
     for bell in Bells:
