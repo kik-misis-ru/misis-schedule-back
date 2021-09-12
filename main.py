@@ -130,10 +130,10 @@ async def get_teacher(teacher_initials):
     response = dict()
     if(len(arr_initials)!=3):
         response['status']="-2"
-        return response
+        return JSONEncoder().encode(response)
     if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
         response['status']="-2"
-        return response
+        return JSONEncoder().encode(response)
     last_name = arr_initials[0]
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
@@ -150,7 +150,7 @@ async def get_teacher(teacher_initials):
         print(datetime.now() - start_time)
         return JSONEncoder().encode(response)
     response["status"]="-1"
-    return response
+    return JSONEncoder().encode(response)
 
 @app.get("/teacher_initials")
 async def get_teacher_initials(teacher_id):
@@ -166,7 +166,7 @@ async def get_teacher_initials(teacher_id):
         return JSONEncoder().encode(response)
     response = dict()
     response["status"]="-1"
-    return response
+    return JSONEncoder().encode(response)
     
     
         
