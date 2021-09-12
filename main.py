@@ -49,6 +49,7 @@ async def get_schedule_json(group_id, date):
     dateDate = datetime.strptime(date, '%Y-%m-%d').date()
     dateDate -= timedelta(dateDate.isoweekday()-1)
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
+    schedule_dict = check_sub_groups(dict(response))
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
@@ -60,6 +61,7 @@ async def get_schedule_json(group_id, date):
         sch = get_json(data)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
+        schedule_dict = check_sub_groups(schedule_dict)
         schedule_dict["createdAt"] = datetime.utcnow()
         collection_schedule.insert_one(schedule_dict)
         return JSONEncoder().encode(schedule_json)
@@ -139,7 +141,7 @@ async def get_teacher(teacher_initials):
     count_rows = await collection_teachers.estimated_document_count()
     if count_rows is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
-        response = FillTeachers(collection_teachers, fio=fio)
+        response = fill_teachers(collection_teachers, fio=fio)
         return response
     teacher_from_db = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
     if teacher_from_db is not None:
@@ -155,15 +157,13 @@ async def get_teacher(teacher_initials):
 async def get_teacher_initials(teacher_id):
     count_rows = await collection_teachers.estimated_document_count()
     if count_rows is None:
-        response =FillTeachers(collection_teachers, id=teacher_id)
+        response =fill_teachers(collection_teachers, id=teacher_id)
         return response
     teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
-    print(3)
     if teacher_from_db is not None:
         response = teacher_from_db
         response["status"]="1"
         response["createdAt"] = str(response["createdAt"])
-        print(4)
         return JSONEncoder().encode(response)
     response = dict()
     response["status"]="-1"
