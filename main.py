@@ -123,7 +123,8 @@ async def get_user(user_id: str):
 
 
 @app.get('/teacher')
-async def get_teacher(teacher_initials):  
+async def get_teacher(teacher_initials): 
+    start_time = datetime.now() 
     arr_initials = teacher_initials.split(' ')
     response = dict()
     if(len(arr_initials)!=3):
@@ -135,29 +136,34 @@ async def get_teacher(teacher_initials):
     last_name = arr_initials[0]
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
-    teachers_db = await collection_teachers.find_one()
-    if teachers_db is None:
+    count_rows = await collection_teachers.estimated_document_count()
+    if count_rows is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
         response = FillTeachers(collection_teachers, fio=fio)
         return response
-    if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
-        response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+    teacher_from_db = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+    if teacher_from_db is not None:
+        response = teacher_from_db
         response["status"]="1"
         response["createdAt"] = str(response["createdAt"])
+        print(datetime.now() - start_time)
         return JSONEncoder().encode(response)
     response["status"]="-1"
     return response
 
 @app.get("/teacher_initials")
 async def get_teacher_initials(teacher_id):
-    teachers_db = await collection_teachers.find_one()
-    if teachers_db is None:
-        response =FillTeachers(collection_teachers, id=teachers_db)
+    count_rows = await collection_teachers.estimated_document_count()
+    if count_rows is None:
+        response =FillTeachers(collection_teachers, id=teacher_id)
         return response
-    if await collection_teachers.find_one({'id':int(teacher_id)}):
-        response = await collection_teachers.find_one({'id':int(teacher_id)})
+    teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
+    print(3)
+    if teacher_from_db is not None:
+        response = teacher_from_db
         response["status"]="1"
         response["createdAt"] = str(response["createdAt"])
+        print(4)
         return JSONEncoder().encode(response)
     response = dict()
     response["status"]="-1"
