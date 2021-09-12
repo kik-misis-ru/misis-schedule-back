@@ -23,7 +23,7 @@ def get_json_teachers(data):
     return response
 
 
-def FillTeachers(collection_schedule_teacher, fio):
+def FillTeachers(collection_schedule_teacher, fio=None, Id=-1):
     data = {
             'filiation_id': 880
         }
@@ -39,8 +39,13 @@ def FillTeachers(collection_schedule_teacher, fio):
         teacher_info['first_name']= teacher_info['first_name'][0]
         if teacher_info['mid_name'] is not None:
             teacher_info['mid_name']= teacher_info['mid_name'][0]
-            if(teacher_info['last_name']==fio.last_name and  teacher_info['first_name']==fio.first_name and teacher_info['mid_name']== fio.mid_name):
-                response = teacher_info
-                response["status"]="1"
+            if(fio is not None):
+                if(teacher_info['last_name']==fio.last_name and  teacher_info['first_name']==fio.first_name and teacher_info['mid_name']== fio.mid_name):
+                    response = teacher_info
+                    response["status"]="1"
+            elif Id is not None:
+                if(teacher_info["Id"]==Id):
+                    response=teacher_info
+                    response["status"]="1"
     collection_schedule_teacher.insert_many(teachers_info)
     return response

@@ -138,7 +138,7 @@ async def get_teacher(teacher_initials):
     teachers_db = await collection_teachers.find_one()
     if teachers_db is None:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
-        response = FillTeachers(collection_teachers, fio)
+        response = FillTeachers(collection_teachers, fio=fio)
         return response
     if await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name}):
         response = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
@@ -147,6 +147,22 @@ async def get_teacher(teacher_initials):
         return JSONEncoder().encode(response)
     response["status"]="-1"
     return response
+
+@app.get("/teacher_initials")
+async def get_teacher_initials(teacher_id):
+    teachers_db = await collection_teachers.find_one()
+    if teachers_db is None:
+        response =FillTeachers(collection_teachers, id=teachers_db)
+        return response
+    if await collection_teachers.find_one({'id':int(teacher_id)}):
+        response = await collection_teachers.find_one({'id':int(teacher_id)})
+        response["status"]="1"
+        response["createdAt"] = str(response["createdAt"])
+        return JSONEncoder().encode(response)
+    response = dict()
+    response["status"]="-1"
+    return response
+    
     
         
 
