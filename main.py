@@ -138,7 +138,7 @@ async def get_teacher(teacher_initials):
     first_name = arr_initials[1][0]
     mid_name = arr_initials[2][0]
     count_rows = await collection_teachers.estimated_document_count()
-    if count_rows is None:
+    if count_rows == 0:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
         response = fill_teachers(collection_teachers, fio=fio)
         return response
@@ -155,7 +155,7 @@ async def get_teacher(teacher_initials):
 @app.get("/teacher_initials")
 async def get_teacher_initials(teacher_id):
     count_rows = await collection_teachers.estimated_document_count()
-    if count_rows is None:
+    if count_rows == 0:
         response =fill_teachers(collection_teachers, id=teacher_id)
         return response
     teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
