@@ -41,7 +41,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+@app.get("/test")
+async  def get_data():
+    data = collection_users.find().aggregate({"group_id"})
+    print(data)
 
 
 @app.get('/schedule')

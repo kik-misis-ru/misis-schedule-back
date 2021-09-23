@@ -21,6 +21,7 @@ def get_json(data):
 
 #получение json файла с преподавателями
 def get_json_teachers(data):
+    print(data)
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     return response
@@ -85,7 +86,7 @@ def check_sub_groups(schedule_dict):
                             subgroups[lesson["subject_id"]][group["subgroup_name"]].append(subGroup)
 
     for key in subgroups:
-        if(len(subgroups[key]["1"])>0  and ("2" not in subgroups[key] or len(subgroups[key]["2"])==0)):
+        if("1" in subgroups[key] and len(subgroups[key]["1"])>0  and ("2" not in subgroups[key] or len(subgroups[key]["2"])==0)):
             for subGroupInf in subgroups[key]["1"]:
                 print(subGroupInf)
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_id"]
