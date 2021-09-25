@@ -93,4 +93,31 @@ def check_sub_groups(schedule_dict):
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_name"]
     return schedule_dict
 
+def get_initials_from_str(teacher_initials):
+    teacher_initials=teacher_initials.replace('.', ' ')
+    
+    while(teacher_initials.__contains__('  ')):
+        teacher_initials=teacher_initials.replace('  ', ' ')
+    if(teacher_initials.isalpha()):
+        return -1
+    teacher_initials = teacher_initials.strip()
+    initials = teacher_initials.split(' ')
+    if(len(initials)==2):
+        if(len(initials[1])!=2):
+            return -1
+        last_name = initials[0].capitalize()
+        first_name = initials[1][0].upper()
+        mid_name = initials[1][1].upper()
+        print([last_name, first_name , mid_name])
+        return [last_name, first_name , mid_name]
+    if len(initials)==3:
+        last_name = initials[0].capitalize()
+        first_name = initials[1].upper()
+        mid_name = initials[2].upper()
+        print([last_name, first_name , mid_name])
+        return [last_name, first_name , mid_name]
+    return -1
+    
+        
+
 

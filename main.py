@@ -129,17 +129,16 @@ async def get_user(user_id: str):
 @app.get('/teacher')
 async def get_teacher(teacher_initials): 
     start_time = datetime.now() 
-    arr_initials = teacher_initials.split(' ')
+    initials =  get_initials_from_str(teacher_initials)
     response = dict()
-    if(len(arr_initials)!=3):
+    if(initials ==-1):
         response['status']="-2"
         return JSONEncoder().encode(response)
-    if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
-        response['status']="-2"
-        return JSONEncoder().encode(response)
-    last_name = arr_initials[0]
-    first_name = arr_initials[1][0]
-    mid_name = arr_initials[2][0]
+    
+    last_name = initials[0]
+    first_name = initials[1]
+    mid_name= initials[2]
+   
     count_rows = await collection_teachers.estimated_document_count()
     if count_rows == 0:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
