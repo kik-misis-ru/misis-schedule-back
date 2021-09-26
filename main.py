@@ -1,3 +1,4 @@
+from english import get_enslish_schedule
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -10,6 +11,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 from utils import *
+from english import *
+import pymongo
 
 
 
@@ -18,7 +21,6 @@ env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 url = os.getenv("MONGO_CONNECTION_STRING")
-print(url)
 client = AsyncIOMotorClient(url)
 
 db = client.get_database("schedule")
@@ -27,6 +29,7 @@ collection_schedule_teacher = db.get_collection("schedule_teacher")
 collection_users = db.get_collection("users")
 collection_teachers = db.get_collection("teachers")
 
+#collection_schedule.create_index([("group_id", pymongo.DESCENDING),("start_date", pymongo.ASCENDING)], unique=True)
 
 
 
@@ -41,15 +44,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-
 @app.get('/schedule')
-async def get_schedule_json(group_id, date):
+async def get_schedule_json(group_id, english_group_id, date):
     dateDate = datetime.strptime(date, '%Y-%m-%d').date()
     dateDate -= timedelta(dateDate.isoweekday()-1)
     response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
     if response:
+        response = await  add_english_schedule(dict(response), english_group_id)
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
@@ -61,9 +62,10 @@ async def get_schedule_json(group_id, date):
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
         schedule_dict = check_sub_groups(schedule_dict)
-        schedule_dict["createdAt"] = datetime.utcnow()
+        schedule_dict["createdAt"] = str(datetime.utcnow())      
         collection_schedule.insert_one(schedule_dict)
-        return JSONEncoder().encode(schedule_json)
+        schedule_dict = await add_english_schedule(dict(schedule_dict), english_group_id)
+        return JSONEncoder().encode(schedule_dict)
 
 @app.get("/schedule_teacher")
 async  def get_schedule_teacher_json(teacher_id, date):
@@ -79,7 +81,6 @@ async  def get_schedule_teacher_json(teacher_id, date):
             'start_date':dateDate
         }
         sch = get_json(data)
-        print(1)
         schedule_json = json.loads(sch)
         schedule_dict = dict(schedule_json)
         schedule_dict["createdAt"] = datetime.utcnow()
@@ -126,19 +127,18 @@ async def get_user(user_id: str):
 @app.get('/teacher')
 async def get_teacher(teacher_initials): 
     start_time = datetime.now() 
-    arr_initials = teacher_initials.split(' ')
+    initials =  get_initials_from_str(teacher_initials)
     response = dict()
-    if(len(arr_initials)!=3):
+    if(initials ==-1):
         response['status']="-2"
-        return response
-    if(not arr_initials[1].endswith('.') or not arr_initials[2].endswith('.') or len(arr_initials[1])!=2 or len(arr_initials[2])!=2):
-        response['status']="-2"
-        return response
-    last_name = arr_initials[0]
-    first_name = arr_initials[1][0]
-    mid_name = arr_initials[2][0]
+        return JSONEncoder().encode(response)
+    
+    last_name = initials[0]
+    first_name = initials[1]
+    mid_name= initials[2]
+   
     count_rows = await collection_teachers.estimated_document_count()
-    if count_rows is None:
+    if count_rows == 0:
         fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
         response = fill_teachers(collection_teachers, fio=fio)
         return response
@@ -150,12 +150,12 @@ async def get_teacher(teacher_initials):
         print(datetime.now() - start_time)
         return JSONEncoder().encode(response)
     response["status"]="-1"
-    return response
+    return JSONEncoder().encode(response)
 
 @app.get("/teacher_initials")
 async def get_teacher_initials(teacher_id):
     count_rows = await collection_teachers.estimated_document_count()
-    if count_rows is None:
+    if count_rows == 0:
         response =fill_teachers(collection_teachers, id=teacher_id)
         return response
     teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
@@ -166,7 +166,8 @@ async def get_teacher_initials(teacher_id):
         return JSONEncoder().encode(response)
     response = dict()
     response["status"]="-1"
-    return response
+    return JSONEncoder().encode(response)
+    
     
     
         

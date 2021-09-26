@@ -27,3 +27,12 @@ class SubGroup():
     subject_id: int
     lesson_num: int
     group_num: int
+
+class Sch:
+    def __init__(self, Group_Id, Teacher, Classes):
+        self.group_id = Group_Id
+        self.teacher = Teacher
+        self.classes = Classes
+    group_id: int
+    teacher: str
+    classes = []

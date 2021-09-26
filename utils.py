@@ -21,6 +21,7 @@ def get_json(data):
 
 #получение json файла с преподавателями
 def get_json_teachers(data):
+    print(data)
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     return response
@@ -85,11 +86,48 @@ def check_sub_groups(schedule_dict):
                             subgroups[lesson["subject_id"]][group["subgroup_name"]].append(subGroup)
 
     for key in subgroups:
-        if(len(subgroups[key]["1"])>0  and ("2" not in subgroups[key] or len(subgroups[key]["2"])==0)):
+        if("1" in subgroups[key] and len(subgroups[key]["1"])>0  and ("2" not in subgroups[key] or len(subgroups[key]["2"])==0)):
             for subGroupInf in subgroups[key]["1"]:
-                print(subGroupInf)
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_id"]
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_name"]
     return schedule_dict
+
+def get_initials_from_str(teacher_initials):
+    teacher_initials=teacher_initials.replace('.', ' ')
+    
+    while(teacher_initials.__contains__('  ')):
+        teacher_initials=teacher_initials.replace('  ', ' ')
+    if(teacher_initials.isalpha()):
+        return -1
+    teacher_initials = teacher_initials.strip()
+    initials = teacher_initials.split(' ')
+    if(len(initials)==2):
+        if(len(initials[1])!=2):
+            return -1
+        last_name = initials[0].capitalize()
+        first_name = initials[1][0].upper()
+        mid_name = initials[1][1].upper()
+        print([last_name, first_name , mid_name])
+        return [last_name, first_name , mid_name]
+    if len(initials)==3:
+        last_name = initials[0].capitalize()
+        first_name = initials[1].upper()
+        mid_name = initials[2].upper()
+        print([last_name, first_name , mid_name])
+        return [last_name, first_name , mid_name]
+    return -1
+
+def formate_teacher_initials(teacher):
+     teacher_initials = teacher.split(' ')
+     if(len(teacher_initials)==2):
+         if(len(teacher_initials[1].strip())==2):
+             name_initial = teacher_initials[1][0]
+             midname_initial = teacher_initials[1][1]
+             return teacher_initials[0]+' '+name_initial+'.'+midname_initial+'.'
+     return teacher
+
+
+
+        
 
 
