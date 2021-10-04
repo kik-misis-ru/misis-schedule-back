@@ -7,6 +7,7 @@ from scheme import  *
 
 Bells = ["bell_1", "bell_2", "bell_3", "bell_4", "bell_5"]
 Days = ["day_1", "day_2", "day_3", "day_4", "day_5", "day_6"]
+
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId):
@@ -27,6 +28,7 @@ def get_json_teachers(data):
     return response
 
 
+#заполняет таблицу с преподавателями в БД
 def fill_teachers(collection_schedule_teacher, fio=None, Id=-1):
     data = {
             'filiation_id': 880
@@ -54,6 +56,7 @@ def fill_teachers(collection_schedule_teacher, fio=None, Id=-1):
     collection_schedule_teacher.insert_many(teachers_info)
     return response
 
+#выполненяет проверку и исправление ошибок с подгруппами в расписании
 def check_sub_groups(schedule_dict):
     subgroups =dict()
     schedule = schedule_dict["schedule"]
@@ -88,11 +91,11 @@ def check_sub_groups(schedule_dict):
     for key in subgroups:
         if("1" in subgroups[key] and len(subgroups[key]["1"])>0  and ("2" not in subgroups[key] or len(subgroups[key]["2"])==0)):
             for subGroupInf in subgroups[key]["1"]:
-                print(subGroupInf)
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_id"]
                 del schedule_dict["schedule"][subGroupInf.bell][subGroupInf.day]["lessons"][subGroup.lesson_num]["groups"][subGroup.group_num]["subgroup_name"]
     return schedule_dict
 
+#из стпроки с ФИО получает фамилию и первые буквы имени и отчества
 def get_initials_from_str(teacher_initials):
     teacher_initials=teacher_initials.replace('.', ' ')
     
@@ -117,7 +120,19 @@ def get_initials_from_str(teacher_initials):
         print([last_name, first_name , mid_name])
         return [last_name, first_name , mid_name]
     return -1
-    
+
+#приводит строку с ФИО к виду Фамилия И. О.
+def formate_teacher_initials(teacher):
+     teacher_initials = teacher.split(' ')
+     if(len(teacher_initials)==2):
+         if(len(teacher_initials[1].strip())==2):
+             name_initial = teacher_initials[1][0]
+             midname_initial = teacher_initials[1][1]
+             return teacher_initials[0]+' '+name_initial+'.'+midname_initial+'.'
+     return teacher
+
+
+
         
 
 
