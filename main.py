@@ -1,10 +1,10 @@
+from pydantic.networks import import_email_validator
 from english import get_enslish_schedule
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
 from scheme import *
 import requests
-from motor.motor_asyncio import AsyncIOMotorClient
 import time
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -12,27 +12,7 @@ from pathlib import Path
 import os
 from utils import *
 from english import *
-import pymongo
-
-
-
-load_dotenv()
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
-
-url = os.getenv("MONGO_CONNECTION_STRING")
-client = AsyncIOMotorClient(url)
-
-db = client.get_database("schedule")
-collection_schedule = db.get_collection("schedule")
-collection_schedule_teacher = db.get_collection("schedule_teacher")
-collection_users = db.get_collection("users")
-collection_teachers = db.get_collection("teachers")
-
-#collection_schedule.create_index([("group_id", pymongo.DESCENDING),("start_date", pymongo.ASCENDING)], unique=True)
-
-
-
+from  Database.mongo import MongoRepository
 
 app = FastAPI()
 
@@ -44,84 +24,53 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+mongo_repository = MongoRepository()
+
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date):
-    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
-    dateDate -= timedelta(dateDate.isoweekday()-1)
-    response = await collection_schedule.find_one({"group_id": str(group_id), "start_date": str(dateDate)})
+    date_monday =  get_monday(date)
+    response = await mongo_repository.get_schedule(group_id, date_monday)
     if response:
         response = await  add_english_schedule(dict(response), english_group_id)
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
-        data = {
-            'group': group_id,
-            'start_date': dateDate
-        }
-        sch = get_json(data)
-        schedule_json = json.loads(sch)
-        schedule_dict = dict(schedule_json)
-        schedule_dict = check_sub_groups(schedule_dict)
-        schedule_dict["createdAt"] = str(datetime.utcnow())      
-        collection_schedule.insert_one(schedule_dict)
-        schedule_dict = await add_english_schedule(dict(schedule_dict), english_group_id)
+        schedule = get_schedule(group_id, date_monday)
+        schedule["createdAt"] = str(datetime.utcnow())      
+        mongo_repository.create_schedule(schedule)
+        schedule_dict = await add_english_schedule(dict(schedule), english_group_id)
         return JSONEncoder().encode(schedule_dict)
 
 #возврвщает расписание для преподавателя по его id
 @app.get("/schedule_teacher")
 async  def get_schedule_teacher_json(teacher_id, date):
-    dateDate = datetime.strptime(date, '%Y-%m-%d').date()
-    dateDate -= timedelta(dateDate.isoweekday()-1)
-    response = await collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(dateDate)})
+    date_monday =get_monday(date)
+    response = await mongo_repository.get_schedule_teacher(teacher_id, date_monday)
     if response:
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     else:
-        data = {
-            'teacher': teacher_id,
-            'start_date':dateDate
-        }
-        sch = get_json(data)
-        schedule_json = json.loads(sch)
-        schedule_dict = dict(schedule_json)
-        schedule_dict["createdAt"] = datetime.utcnow()
-        collection_schedule_teacher.insert_one(schedule_dict)
-        return JSONEncoder().encode(schedule_json)
+        schedule =get_schedule_teacher(teacher_id, date_monday)
+        schedule["createdAt"] = str(datetime.utcnow())
+        mongo_repository.create_teacher_schedule(schedule)
+        return JSONEncoder().encode(schedule)
 
 
 #создает пользователя или обновляет данные о сущетсвующем
 @app.post('/users')
 async def add_user(user: User):
-    if await collection_users.find_one({"user_id": user.user_id}) is None:
-        await collection_users.insert_one(dict(user))
+    if await mongo_repository.find_user(user.user_id) is None:
+        mongo_repository.create_user(dict(user))
     else:
-        collection_users.update_one({"user_id": user.user_id},
-                                    {"$set":
-                                         {"filial_id": user.filial_id,
-                                          "group_id": user.group_id,
-                                          "subgroup_name": user.subgroup_name,
-                                          "eng_group": user.eng_group,
-                                          "teacher_id":user.teacher_id}
-
-                                     })
-
+        mongo_repository.update_user(user)
 
 #возращает данные о пользователе по его id
 @app.get('/users')
 async def get_user(user_id: str):
-    if await collection_users.find_one({"user_id": user_id}):
-        response = await collection_users.find_one({"user_id": user_id})
-        result = {}
-        result["user_id"] = response["user_id"]
-        result["filial_id"] = response["filial_id"]
-        result["group_id"] = response["group_id"]
-        result["subgroup_name"] = response["subgroup_name"]
-        result["eng_group"] = response["eng_group"]
-        if("teacher_id" in response):
-            result["teacher_id"]=response["teacher_id"]
-        else:
-            result["teacher_id"]=""
+    response = await mongo_repository.find_user(user_id)
+    if response:
+        result = get_user_info(response)
         return result
     else:
         return "0"
@@ -130,47 +79,46 @@ async def get_user(user_id: str):
 #возвращает данные о пользователи по его инициалам
 @app.get('/teacher')
 async def get_teacher(teacher_initials): 
-    start_time = datetime.now() 
-    initials =  get_initials_from_str(teacher_initials)
+    fio =  get_initials_from_str(teacher_initials)
     response = dict()
-    if(initials ==-1):
-        response['status']="-2"
+    if(fio ==-1):
+        response['status']= status_code_error
         return JSONEncoder().encode(response)
-    
-    last_name = initials[0]
-    first_name = initials[1]
-    mid_name= initials[2]
-   
-    count_rows = await collection_teachers.estimated_document_count()
+    count_rows = await mongo_repository.teachers_count()
     if count_rows == 0:
-        fio = FIO(last_name=last_name,first_name=first_name,mid_name=mid_name)
-        response = fill_teachers(collection_teachers, fio=fio)
+        teachers_info = get_teachers()
+        mongo_repository.fill_teachers(teachers_info)
+        response = find_teahcer
         return response
-    teacher_from_db = await collection_teachers.find_one({'last_name': last_name, 'first_name': first_name, 'mid_name':mid_name})
+    teacher_from_db = await mongo_repository.find_teacher(fio)
     if teacher_from_db is not None:
         response = teacher_from_db
-        response["status"]="1"
+        response["status"]=status_code_success
         response["createdAt"] = str(response["createdAt"])
-        print(datetime.now() - start_time)
         return JSONEncoder().encode(response)
-    response["status"]="-1"
+    response["status"]=statuc_code_not_found
     return JSONEncoder().encode(response)
 
 #возвращает инициалы преподаватели по его id
 @app.get("/teacher_initials")
 async def get_teacher_initials(teacher_id):
-    count_rows = await collection_teachers.estimated_document_count()
+    count_rows = await mongo_repository.teachers_count()
     if count_rows == 0:
-        response =fill_teachers(collection_teachers, id=teacher_id)
+        teachers_info = get_teachers()
+        mongo_repository.fill_teachers(teachers_info)
+        for teacher_info in teachers_info:
+            if(teacher_info["Id"]==teacher_id):
+                response=teacher_info
+                response["status"]="1"
         return response
-    teacher_from_db =  await collection_teachers.find_one({'id':int(teacher_id)})
+    teacher_from_db =  await mongo_repository.find_teacher_id(int(teacher_id))
     if teacher_from_db is not None:
         response = teacher_from_db
-        response["status"]="1"
+        response["status"]=status_code_success
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     response = dict()
-    response["status"]="-1"
+    response["status"]=statuc_code_not_found
     return JSONEncoder().encode(response)
     
     
