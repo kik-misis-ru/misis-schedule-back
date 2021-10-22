@@ -120,6 +120,12 @@ async def get_teacher_initials(teacher_id):
     response = dict()
     response["status"]=statuc_code_not_found
     return JSONEncoder().encode(response)
+
+@app.get("/load_groups")
+async def load_groups():
+    groups = get_groups()
+    mongo_repository.create_grouplist(groups)
+    
     
     
     

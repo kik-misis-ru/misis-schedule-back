@@ -59,6 +59,18 @@ def get_teachers():
     teachers_info = teachers_info_response['teachers']
     return teachers_info
 
+def get_groups():
+    data = {
+            'filiation_id': filial_id
+        }
+    req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
+    response = json.dumps(req.json(), indent=2, ensure_ascii=False)
+    filial_info_json = json.loads(response)
+    filial_info_dict = dict(filial_info_json)
+    teachers_info_response = filial_info_dict['response']
+    teachers_info = teachers_info_response['groups']
+    return teachers_info
+
 
 
 #выполненяет проверку и исправление ошибок с подгруппами в расписании
