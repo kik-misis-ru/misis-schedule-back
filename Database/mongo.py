@@ -68,9 +68,10 @@ class MongoRepository:
         createdAt = datetime.utcnow()
         for group in group_list:
             group['createdAt'] = createdAt
+            group['lower_name'] = group['name'].lower()
         self.collection_group_list.insert_many(group_list)
 
     async def get_group_by_id(self, group_id):
         return await self.collection_group_list.find_one({'id':int(group_id)})
     async def get_group_by_name(self, group_name):
-        return await self.collection_group_list.find_one({'name':group_name})
+        return await self.collection_group_list.find_one({'lower_name':group_name.lower()})
