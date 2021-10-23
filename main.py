@@ -31,6 +31,7 @@ mongo_repository = MongoRepository()
 async def get_schedule_json(group_id, english_group_id, date):
     date_monday =  get_monday(date)
     response = await mongo_repository.get_schedule(group_id, date_monday)
+    
     if response:
         response = await  add_english_schedule(dict(response), english_group_id)
         response["createdAt"] = str(response["createdAt"])

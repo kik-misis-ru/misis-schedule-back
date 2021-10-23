@@ -20,9 +20,12 @@ class MongoRepository:
         self.collection_group_list = db.get_collection("group_list")
 
     async def get_schedule(self, group_id, date_monday):
+        print("groud_id", group_id)
+        print("datw_monday", date_monday)
         return await self.collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date_monday)})
     
     def create_schedule(self, schedule):
+        print(schedule)
         self.collection_schedule.insert_one(schedule)
 
     async def get_schedule_teacher(self, teacher_id, date_monday):
