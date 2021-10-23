@@ -126,6 +126,32 @@ async def load_groups():
     groups = get_groups()
     mongo_repository.create_grouplist(groups)
     
+@app.get("/group_by_id")
+async def group_by_id(group_id):
+    response = dict()
+    group = await mongo_repository.get_group_by_id(group_id)
+    if group:
+         response['id'] = group['id']
+         response['name'] = group['name']
+         response["status"]= status_code_success
+         return response
+    else:
+        response["status"] = statuc_code_not_found
+        return response
+
+@app.get("/group_by_name")
+async def group_by_id(name):
+    response = dict()
+    group = await mongo_repository.get_group_by_name(name)
+    if group:
+         response['id'] = group['id']
+         response['name'] = group['name']
+         response["status"]= status_code_success
+         return response
+    else:
+        response = dict()
+        response["status"] = statuc_code_not_found
+        return response
     
     
     

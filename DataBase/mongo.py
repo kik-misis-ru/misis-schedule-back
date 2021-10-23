@@ -17,7 +17,6 @@ class MongoRepository:
         self.collection_schedule_teacher = db.get_collection("schedule_teacher")
         self.collection_users = db.get_collection("users")
         self.collection_teachers = db.get_collection("teachers")
-        self.collection_group_list = db.get_collection("group_list")
 
     async def get_schedule(self, group_id, date_monday):
         return await self.collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date_monday)})
@@ -64,13 +63,3 @@ class MongoRepository:
     
     async def find_teacher_id(self, teacher_id):
         return await self.collection_teachers.find_one({'id':teacher_id})
-    def create_grouplist(self, group_list):
-        createdAt = datetime.utcnow()
-        for group in group_list:
-            group['createdAt'] = createdAt
-        self.collection_group_list.insert_many(group_list)
-
-    async def get_group_by_id(self, group_id):
-        return await self.collection_group_list.find_one({'id':int(group_id)})
-    async def get_group_by_name(self, group_name):
-        return await self.collection_group_list.find_one({'name':group_name})
