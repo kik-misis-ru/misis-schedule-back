@@ -140,7 +140,7 @@ async def group_by_id(group_id):
         return response
 
 @app.get("/group_by_name")
-async def group_by_id(name):
+async def group_by_name(name):
     response = dict()
     group = await mongo_repository.get_group_by_name(name)
     if group:
