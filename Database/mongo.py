@@ -41,7 +41,8 @@ class MongoRepository:
         self.collection_users.insert_one(user)
     
     def update_user(self, user):
-        print(user)
+        if(user.group_id == "undefined"):
+            return
         self.collection_users.update_one({"user_id": user.user_id},
                                     {"$set":
                                          {"filial_id": user.filial_id,
