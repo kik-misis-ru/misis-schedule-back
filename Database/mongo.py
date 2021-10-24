@@ -18,6 +18,7 @@ class MongoRepository:
         self.collection_users = db.get_collection("users")
         self.collection_teachers = db.get_collection("teachers")
         self.collection_group_list = db.get_collection("group_list")
+        self.collection_english_group_list = db.get_collection("english_group_list")
 
     async def get_schedule(self, group_id, date_monday):
         print("groud_id", group_id)
@@ -69,14 +70,38 @@ class MongoRepository:
     
     async def find_teacher_id(self, teacher_id):
         return await self.collection_teachers.find_one({'id':teacher_id})
-    def create_grouplist(self, group_list):
+
+    async def create_grouplist(self, group_list):
+        print(group_list)
         createdAt = datetime.utcnow()
         for group in group_list:
             group['createdAt'] = createdAt
             group['lower_name'] = group['name'].lower()
-        self.collection_group_list.insert_many(group_list)
+        return await self.collection_group_list.insert_many(group_list)
+    
+    async def delete_grouplist(self):
+        return await self.collection_group_list.delete_many({})
+
+    async def count_group_list(self):
+        return await self.collection_group_list.estimated_document_count()
 
     async def get_group_by_id(self, group_id):
         return await self.collection_group_list.find_one({'id':int(group_id)})
     async def get_group_by_name(self, group_name):
         return await self.collection_group_list.find_one({'lower_name':group_name.lower()})
+
+    async def create_english_groups(self, enslish_group_list):
+        createdAt = datetime.utcnow()
+        groups_to_db = []
+        for group in enslish_group_list:
+            group_to_db = dict()
+            group_to_db['createdAt'] = createdAt
+            group_to_db['number'] = group
+            groups_to_db.append(group_to_db)
+        return await self.collection_english_group_list.insert_many(groups_to_db)
+    async def delete_english_group_list(self):
+        return await self.collection_english_group_list.delete_many({})
+    async def count_engslish_group_list(self):
+        return await self.collection_english_group_list.estimated_document_count()
+    async def find_english_group(self, group_num):
+        return await self.collection_english_group_list.find_one({"number": group_num})

@@ -12,7 +12,7 @@ filial_id = 880
 
 
 status_code_success = "1"
-statuc_code_not_found = "-1"
+status_code_not_found = "-1"
 status_code_error= "-2"
 
 class JSONEncoder(json.JSONEncoder):

@@ -1,3 +1,4 @@
+from requests.models import Response, requote_uri
 from pydantic.networks import import_email_validator
 from english import get_enslish_schedule
 from fastapi import FastAPI
@@ -97,7 +98,7 @@ async def get_teacher(teacher_initials):
         response["status"]=status_code_success
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
-    response["status"]=statuc_code_not_found
+    response["status"]=status_code_not_found
     return JSONEncoder().encode(response)
 
 #возвращает инициалы преподаватели по его id
@@ -119,13 +120,43 @@ async def get_teacher_initials(teacher_id):
         response["createdAt"] = str(response["createdAt"])
         return JSONEncoder().encode(response)
     response = dict()
-    response["status"]=statuc_code_not_found
+    response["status"]=status_code_not_found
     return JSONEncoder().encode(response)
 
 @app.get("/load_groups")
 async def load_groups():
+    response = dict()
+    delete_result = await mongo_repository.delete_grouplist()
+    if(delete_result.deleted_count==0):
+        count_rows = await mongo_repository.collection_group_list()
+        if(count_rows!=0):
+            response["status"] = status_code_error
+            return response
     groups = get_groups()
-    mongo_repository.create_grouplist(groups)
+    insert_result = await mongo_repository.create_grouplist(groups)
+    
+    if(len(insert_result.inserted_ids)>0):
+        response["status"] = status_code_success
+    else:
+        response["status"] = status_code_error
+    return response
+
+@app.get("/load_english_groups")
+async def load_english_groups():
+    response = dict()
+    delete_result = await mongo_repository.delete_english_group_list()
+    if(delete_result.deleted_count==0):
+        count_rows = await mongo_repository.count_engslish_group_list()
+        if(count_rows!=0):
+            response["status"] = status_code_error
+            return response
+    groups = get_all_english_groups()
+    insert_result = await mongo_repository.create_english_groups(groups)
+    if(len(insert_result.inserted_ids)>0):
+        response["status"] = status_code_success
+    else:
+        response["status"] = status_code_error
+    return response
     
 @app.get("/group_by_id")
 async def group_by_id(group_id):
@@ -137,7 +168,7 @@ async def group_by_id(group_id):
          response["status"]= status_code_success
          return response
     else:
-        response["status"] = statuc_code_not_found
+        response["status"] = status_code_not_found
         return response
 
 @app.get("/group_by_name")
@@ -151,8 +182,20 @@ async def group_by_name(name):
          return response
     else:
         response = dict()
-        response["status"] = statuc_code_not_found
+        response["status"] = status_code_not_found
         return response
+
+@app.get("/is_ensglish_group_exist")
+async def is_english_group_exist(group_num):
+    group = await mongo_repository.find_english_group(group_num)
+    response = dict()
+    if(group):
+        response["status"] = status_code_success
+    else:
+        response["status"] = status_code_not_found
+    return response
+
+
     
     
     
