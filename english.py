@@ -1,4 +1,4 @@
-import gspread # pip install gspread
+import gspread
 from utils import *
 import time
 import os
@@ -22,6 +22,7 @@ google_sheets_files = [os.getenv("FIRST_COURSE_TECH_BACHELOR_ENGLISH"),
                        os.getenv("THIRD_COURSE_TECH_BACHELOR_ENGLISH"),
                        os.getenv("FOURTH_COURSE_TECH_BACHELOR_ENGLISH")]
 
+#возвращает расписание по английскому, получанное из google-файла или из БД
 def get_enslish_schedule(group_id):
     if not group_id:
         return -1
@@ -49,6 +50,7 @@ def get_enslish_schedule(group_id):
                             return sch       
     return -1
 
+#встраивает расписание по английскому в основное расписание
 def set_english_info_to_schedule(schedule_dict, eng_schedule):
     schedule = schedule_dict["schedule"]
     count=0
@@ -75,6 +77,7 @@ def set_english_info_to_schedule(schedule_dict, eng_schedule):
                     count+=1
     return schedule_dict
     
+#выполняет получение расписания по английскому и встраивание его в основное расписание
 async def add_english_schedule(schedule_dict, eng_group_id):
     response = await collection_english.find_one({"group_id": str(eng_group_id)})
     if response:
@@ -92,6 +95,24 @@ async def add_english_schedule(schedule_dict, eng_group_id):
         schedule_dict = set_english_info_to_schedule(schedule_dict, english_schedule_dict)
         collection_english.insert_one(english_schedule_dict)
         return schedule_dict
+
+def get_all_english_groups():
+    gc = gspread.service_account(filename='creds.json')
+    group_list = []
+    for course in google_sheets_files:
+        sh = gc.open_by_key(course)
+        nums = [str(i) for i in range(1,32)]
+        for sheet in sh:
+            table = sheet.get_all_values()
+            for row in table[4:]:
+                if(len(row)==0):
+                    continue
+                if row[0] not in nums:
+                    for i in range(0, len(row), 3):
+                        if row[i] and len(row[i])>2:
+                            group = row[i].split(' ')[0].strip()
+                            group_list.append(group)     
+    return group_list
 
 
 
