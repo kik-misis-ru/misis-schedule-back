@@ -185,7 +185,7 @@ async def group_by_name(name):
         response["status"] = status_code_not_found
         return response
 
-@app.get("/is_ensglish_group_exist")
+@app.get("/is_english_group_exist")
 async def is_english_group_exist(group_num):
     group = await mongo_repository.find_english_group(group_num)
     response = dict()
