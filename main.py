@@ -1,19 +1,11 @@
-from requests.models import Response, requote_uri
-from pydantic.networks import import_email_validator
-from english import get_enslish_schedule
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import json
 from scheme import *
-import requests
-import time
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+from datetime import datetime
 from utils import *
 from english import *
 from  Database.mongo import MongoRepository
+from Schedule.schedule import *
 
 app = FastAPI()
 
@@ -30,33 +22,12 @@ mongo_repository = MongoRepository()
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date):
-    date_monday =  get_monday(date)
-    response = await mongo_repository.get_schedule(group_id, date_monday)
-    
-    if response:
-        response = await  add_english_schedule(dict(response), english_group_id)
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    else:
-        schedule = get_schedule(group_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow())      
-        mongo_repository.create_schedule(schedule)
-        schedule_dict = await add_english_schedule(dict(schedule), english_group_id)
-        return JSONEncoder().encode(schedule_dict)
+    return JSONEncoder().encode(await get_schedule(group_id, english_group_id, date))
 
 #возврвщает расписание для преподавателя по его id
 @app.get("/schedule_teacher")
 async  def get_schedule_teacher_json(teacher_id, date):
-    date_monday =get_monday(date)
-    response = await mongo_repository.get_schedule_teacher(teacher_id, date_monday)
-    if response:
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    else:
-        schedule =get_schedule_teacher(teacher_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow())
-        mongo_repository.create_teacher_schedule(schedule)
-        return JSONEncoder().encode(schedule)
+   return JSONEncoder().encode(await get_teacher_schedule(teacher_id, date))
 
 
 #создает пользователя или обновляет данные о сущетсвующем
@@ -76,6 +47,11 @@ async def get_user(user_id: str):
         return result
     else:
         return "0"
+
+#возврвщает расписание по id пользователя (используется при загрузке приложения)
+@app.get('/schedule_by_user_id')
+async def get_schedule_by_sub(user_id: str):
+    return JSONEncoder().encode(await get_schedule_by_user_id(user_id))
 
 
 #возвращает данные о пользователи по его инициалам
@@ -185,7 +161,7 @@ async def group_by_name(name):
         response["status"] = status_code_not_found
         return response
 
-@app.get("/is_ensglish_group_exist")
+@app.get("/is_english_group_exist")
 async def is_english_group_exist(group_num):
     group = await mongo_repository.find_english_group(group_num)
     response = dict()
