@@ -1,16 +1,7 @@
-from requests.models import Response, requote_uri
-from pydantic.networks import import_email_validator
-from english import get_enslish_schedule
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import json
 from scheme import *
-import requests
-import time
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+from datetime import datetime
 from utils import *
 from english import *
 from  Database.mongo import MongoRepository
@@ -57,26 +48,10 @@ async def get_user(user_id: str):
     else:
         return "0"
 
+#возврвщает расписание по id пользователя (используется при загрузке приложения)
 @app.get('/schedule_by_user_id')
 async def get_schedule_by_sub(user_id: str):
-    start = datetime.now()
-    response = await mongo_repository.find_user(user_id)
-    print(datetime.now()-start)
-    group = await mongo_repository.get_group_by_id(response["group_id"])
-    response["groupName"] = group["name"]
-    date = datetime.today().strftime('%Y-%m-%d')
-    if "teacher_id" in response and response["teacher_id"] != "":
-        response["schedule"] = await get_schedule_teacher(response["teacher_id"], date)
-        response["teacherInfo"] = await mongo_repository.find_teacher_id(response["teacher_id"])
-    else:
-        group_id = response["group_id"]
-        english_group_id = response["eng_group"]
-        schedule =  await get_schedule(group_id, english_group_id, date)
-        response["schedule"] = schedule
-    print(datetime.now() - start)
-    return JSONEncoder().encode(response)
-
-
+    return JSONEncoder().encode(await get_schedule_by_user_id(user_id))
 
 
 #возвращает данные о пользователи по его инициалам

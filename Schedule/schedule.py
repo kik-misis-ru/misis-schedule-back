@@ -1,16 +1,5 @@
-from requests.models import Response, requote_uri
-from pydantic.networks import import_email_validator
-from english import get_enslish_schedule
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import json
 from scheme import *
-import requests
-import time
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+from datetime import datetime
 from utils import *
 from english import *
 from  Database.mongo import MongoRepository
@@ -44,3 +33,18 @@ async def get_teacher_schedule(teacher_id, date):
         schedule["createdAt"] = str(datetime.utcnow())
         mongo_repository.create_teacher_schedule(schedule)
         return schedule
+async def get_schedule_by_user_id(user_id: str):
+    response = await mongo_repository.find_user(user_id)
+    group = await mongo_repository.get_group_by_id(response["group_id"])
+    response["groupName"] = group["name"]
+    date = datetime.today().strftime('%Y-%m-%d')
+    if "teacher_id" in response and response["teacher_id"] != "":
+        teacher_id = response["teacher_id"]
+        response["schedule"] = await get_schedule_teacher(teacher_id, date)
+        response["teacherInfo"] = await mongo_repository.find_teacher_id(teacher_id)
+    else:
+        group_id = response["group_id"]
+        english_group_id = response["eng_group"]
+        schedule =  await get_schedule(group_id, english_group_id, date)
+        response["schedule"] = schedule
+    return response
