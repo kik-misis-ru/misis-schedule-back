@@ -13,7 +13,7 @@ from pathlib import Path
 import os
 from utils import *
 from english import *
-from  Database.mongo import MongoRepository
+from  DataBase.mongo import MongoRepository
 
 mongo_repository = MongoRepository()
 
