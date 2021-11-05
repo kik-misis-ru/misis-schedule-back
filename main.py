@@ -31,19 +31,7 @@ mongo_repository = MongoRepository()
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date):
-    date_monday =  get_monday(date)
-    response = await mongo_repository.get_schedule(group_id, date_monday)
-    
-    if response:
-        response = await  add_english_schedule(dict(response), english_group_id)
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    else:
-        schedule = get_schedule(group_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow())      
-        mongo_repository.create_schedule(schedule)
-        schedule_dict = await add_english_schedule(dict(schedule), english_group_id)
-        return JSONEncoder().encode(schedule_dict)
+    return JSONEncoder().encode(await get_schedule(group_id, english_group_id, date))
 
 #возврвщает расписание для преподавателя по его id
 @app.get("/schedule_teacher")
@@ -68,6 +56,27 @@ async def get_user(user_id: str):
         return result
     else:
         return "0"
+
+@app.get('/schedule_by_user_id')
+async def get_schedule_by_sub(user_id: str):
+    start = datetime.now()
+    response = await mongo_repository.find_user(user_id)
+    print(datetime.now()-start)
+    group = await mongo_repository.get_group_by_id(response["group_id"])
+    response["groupName"] = group["name"]
+    date = datetime.today().strftime('%Y-%m-%d')
+    if "teacher_id" in response and response["teacher_id"] != "":
+        response["schedule"] = await get_schedule_teacher(response["teacher_id"], date)
+        response["teacherInfo"] = await mongo_repository.find_teacher_id(response["teacher_id"])
+    else:
+        group_id = response["group_id"]
+        english_group_id = response["eng_group"]
+        schedule =  await get_schedule(group_id, english_group_id, date)
+        response["schedule"] = schedule
+    print(datetime.now() - start)
+    return JSONEncoder().encode(response)
+
+
 
 
 #возвращает данные о пользователи по его инициалам
@@ -177,7 +186,7 @@ async def group_by_name(name):
         response["status"] = status_code_not_found
         return response
 
-@app.get("/is_ensglish_group_exist")
+@app.get("/is_english_group_exist")
 async def is_english_group_exist(group_num):
     group = await mongo_repository.find_english_group(group_num)
     response = dict()

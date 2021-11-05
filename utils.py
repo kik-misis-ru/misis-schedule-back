@@ -183,7 +183,7 @@ def find_teahcer(teachers_info, fio):
                     response = teacher_info
                     response["status"]=status_code_success
                     return response
-     response["status"]=statuc_code_not_found
+     response["status"]=status_code_not_found
      return response
 
 def get_user_info(response):
