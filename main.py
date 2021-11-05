@@ -14,6 +14,7 @@ import os
 from utils import *
 from english import *
 from  Database.mongo import MongoRepository
+from Schedule.schedule import *
 
 app = FastAPI()
 
@@ -47,16 +48,7 @@ async def get_schedule_json(group_id, english_group_id, date):
 #возврвщает расписание для преподавателя по его id
 @app.get("/schedule_teacher")
 async  def get_schedule_teacher_json(teacher_id, date):
-    date_monday =get_monday(date)
-    response = await mongo_repository.get_schedule_teacher(teacher_id, date_monday)
-    if response:
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    else:
-        schedule =get_schedule_teacher(teacher_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow())
-        mongo_repository.create_teacher_schedule(schedule)
-        return JSONEncoder().encode(schedule)
+   return JSONEncoder().encode(await get_teacher_schedule(teacher_id, date))
 
 
 #создает пользователя или обновляет данные о сущетсвующем
