@@ -22,7 +22,7 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 # получение json файла с недельным расписанием для группы
-def get_schedule(group_id, date_monday):
+def get_schedule_from_api(group_id, date_monday):
     data = {
             'group': group_id,
             'start_date': date_monday
@@ -34,7 +34,7 @@ def get_schedule(group_id, date_monday):
     schedule = check_sub_groups(schedule_dict)
     return schedule
 
-def get_schedule_teacher(teacher_id, date_monday):
+def get_schedule_teacher_from_api(teacher_id, date_monday):
     data = {
             'teacher': teacher_id,
             'start_date':date_monday

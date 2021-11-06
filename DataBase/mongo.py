@@ -69,7 +69,7 @@ class MongoRepository:
         return await self.collection_teachers.find_one({'last_name': fio.last_name, 'first_name': fio.first_name, 'mid_name':fio.mid_name})
     
     async def find_teacher_id(self, teacher_id):
-        return await self.collection_teachers.find_one({'id':teacher_id})
+        return await self.collection_teachers.find_one({'id':int(teacher_id)})
 
     async def create_grouplist(self, group_list):
         print(group_list)

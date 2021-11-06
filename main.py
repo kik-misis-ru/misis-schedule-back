@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from scheme import *
-from datetime import datetime
-from utils import *
-from english import *
 from  Database.mongo import MongoRepository
 from Schedule.schedule import *
+from Teacher.teacher import *
+from Group.group import *
+from User.user import *
 
 app = FastAPI()
 
@@ -32,21 +31,13 @@ async  def get_schedule_teacher_json(teacher_id, date):
 
 #создает пользователя или обновляет данные о сущетсвующем
 @app.post('/users')
-async def add_user(user: User):
-    if await mongo_repository.find_user(user.user_id) is None:
-        mongo_repository.create_user(dict(user))
-    else:
-        mongo_repository.update_user(user)
+async def add_user_handler(user: User):
+    await add_user(user)
 
 #возращает данные о пользователе по его id
 @app.get('/users')
-async def get_user(user_id: str):
-    response = await mongo_repository.find_user(user_id)
-    if response:
-        result = get_user_info(response)
-        return result
-    else:
-        return "0"
+async def get_user_handler(user_id: str):
+    return get_user(user_id)
 
 #возврвщает расписание по id пользователя (используется при загрузке приложения)
 @app.get('/schedule_by_user_id')
@@ -56,120 +47,33 @@ async def get_schedule_by_sub(user_id: str):
 
 #возвращает данные о пользователи по его инициалам
 @app.get('/teacher')
-async def get_teacher(teacher_initials): 
-    fio =  get_initials_from_str(teacher_initials)
-    response = dict()
-    if(fio ==-1):
-        response['status']= status_code_error
-        return JSONEncoder().encode(response)
-    count_rows = await mongo_repository.teachers_count()
-    if count_rows == 0:
-        teachers_info = get_teachers()
-        mongo_repository.fill_teachers(teachers_info)
-        response = find_teahcer
-        return response
-    teacher_from_db = await mongo_repository.find_teacher(fio)
-    if teacher_from_db is not None:
-        response = teacher_from_db
-        response["status"]=status_code_success
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    response["status"]=status_code_not_found
-    return JSONEncoder().encode(response)
+async def get_teacher_handler(teacher_initials): 
+    return JSONEncoder().encode(await get_teacher(teacher_initials))
 
 #возвращает инициалы преподаватели по его id
 @app.get("/teacher_initials")
-async def get_teacher_initials(teacher_id):
-    count_rows = await mongo_repository.teachers_count()
-    if count_rows == 0:
-        teachers_info = get_teachers()
-        mongo_repository.fill_teachers(teachers_info)
-        for teacher_info in teachers_info:
-            if(teacher_info["Id"]==teacher_id):
-                response=teacher_info
-                response["status"]="1"
-        return response
-    teacher_from_db =  await mongo_repository.find_teacher_id(int(teacher_id))
-    if teacher_from_db is not None:
-        response = teacher_from_db
-        response["status"]=status_code_success
-        response["createdAt"] = str(response["createdAt"])
-        return JSONEncoder().encode(response)
-    response = dict()
-    response["status"]=status_code_not_found
-    return JSONEncoder().encode(response)
+async def get_teacher_initials_handler(teacher_id):
+    return JSONEncoder().encode( await get_teacher(teacher_id))
 
 @app.get("/load_groups")
-async def load_groups():
-    response = dict()
-    delete_result = await mongo_repository.delete_grouplist()
-    if(delete_result.deleted_count==0):
-        count_rows = await mongo_repository.collection_group_list()
-        if(count_rows!=0):
-            response["status"] = status_code_error
-            return response
-    groups = get_groups()
-    insert_result = await mongo_repository.create_grouplist(groups)
-    
-    if(len(insert_result.inserted_ids)>0):
-        response["status"] = status_code_success
-    else:
-        response["status"] = status_code_error
-    return response
+async def load_groups_handler():
+   return JSONEncoder().encode(await load_groups())
 
 @app.get("/load_english_groups")
-async def load_english_groups():
-    response = dict()
-    delete_result = await mongo_repository.delete_english_group_list()
-    if(delete_result.deleted_count==0):
-        count_rows = await mongo_repository.count_engslish_group_list()
-        if(count_rows!=0):
-            response["status"] = status_code_error
-            return response
-    groups = get_all_english_groups()
-    insert_result = await mongo_repository.create_english_groups(groups)
-    if(len(insert_result.inserted_ids)>0):
-        response["status"] = status_code_success
-    else:
-        response["status"] = status_code_error
-    return response
+async def load_english_groups_handler():
+    return JSONEncoder().encode(await load_english_groups())
     
 @app.get("/group_by_id")
-async def group_by_id(group_id):
-    response = dict()
-    group = await mongo_repository.get_group_by_id(group_id)
-    if group:
-         response['id'] = group['id']
-         response['name'] = group['name']
-         response["status"]= status_code_success
-         return response
-    else:
-        response["status"] = status_code_not_found
-        return response
+async def group_by_id_handler(group_id):
+    return JSONEncoder().encode(await group_by_id(group_id))
 
 @app.get("/group_by_name")
-async def group_by_name(name):
-    response = dict()
-    group = await mongo_repository.get_group_by_name(name)
-    if group:
-         response['id'] = group['id']
-         response['name'] = group['name']
-         response["status"]= status_code_success
-         return response
-    else:
-        response = dict()
-        response["status"] = status_code_not_found
-        return response
+async def group_by_name_handler(name):
+    return JSONEncoder().encode(await group_by_name(name))
 
 @app.get("/is_english_group_exist")
-async def is_english_group_exist(group_num):
-    group = await mongo_repository.find_english_group(group_num)
-    response = dict()
-    if(group):
-        response["status"] = status_code_success
-    else:
-        response["status"] = status_code_not_found
-    return response
+async def is_english_group_exist_handler(group_num):
+    return JSONEncoder().encode(await is_english_group_exist(group_num))
 
 
     
