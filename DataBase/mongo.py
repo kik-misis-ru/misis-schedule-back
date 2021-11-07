@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import motor
 from motor.motor_asyncio import AsyncIOMotorClient
+from scheme import  UserPush
 
 class MongoRepository:
     def __init__(self):
@@ -19,6 +20,7 @@ class MongoRepository:
         self.collection_teachers = db.get_collection("teachers")
         self.collection_group_list = db.get_collection("group_list")
         self.collection_english_group_list = db.get_collection("english_group_list")
+        self.collection_users_with_push = db.get_collection("users_with_push")
 
     async def get_schedule(self, group_id, date_monday):
         print("groud_id", group_id)
@@ -69,7 +71,7 @@ class MongoRepository:
         return await self.collection_teachers.find_one({'last_name': fio.last_name, 'first_name': fio.first_name, 'mid_name':fio.mid_name})
     
     async def find_teacher_id(self, teacher_id):
-        return await self.collection_teachers.find_one({'id':teacher_id})
+        return await self.collection_teachers.find_one({'id':int(teacher_id)})
 
     async def create_grouplist(self, group_list):
         print(group_list)
@@ -105,3 +107,8 @@ class MongoRepository:
         return await self.collection_english_group_list.estimated_document_count()
     async def find_english_group(self, group_num):
         return await self.collection_english_group_list.find_one({"number": group_num})
+    async  def add_user_to_push(self,user_push: UserPush):
+        return  await self.collection_users_with_push.insert_one(dict(user_push))
+    async def get_subs_for_push(self, hour: int):
+        return 1
+       # return await self.collection_users_with_push.find_one({"hour": hour}))
