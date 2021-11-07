@@ -1,6 +1,5 @@
 import gspread
 from utils import *
-import time
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv

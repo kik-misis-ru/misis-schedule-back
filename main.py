@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from  Database.mongo import MongoRepository
@@ -5,6 +6,8 @@ from Schedule.schedule import *
 from Teacher.teacher import *
 from Group.group import *
 from User.user import *
+from PushNotifications.Push import *
+from threading import Thread
 
 app = FastAPI()
 
@@ -17,6 +20,11 @@ app.add_middleware(
 )
 
 mongo_repository = MongoRepository()
+
+th = Thread(target=run_push)
+th.start()
+
+
 
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
@@ -74,6 +82,7 @@ async def group_by_name_handler(name):
 @app.get("/is_english_group_exist")
 async def is_english_group_exist_handler(group_num):
     return JSONEncoder().encode(await is_english_group_exist(group_num))
+
 
 
     

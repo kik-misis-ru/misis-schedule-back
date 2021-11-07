@@ -34,6 +34,7 @@ def get_schedule_from_api(group_id, date_monday):
     schedule = check_sub_groups(schedule_dict)
     return schedule
 
+# получение json файла с недельным расписанием для преподавателя
 def get_schedule_teacher_from_api(teacher_id, date_monday):
     data = {
             'teacher': teacher_id,
@@ -59,6 +60,7 @@ def get_teachers():
     teachers_info = teachers_info_response['teachers']
     return teachers_info
 
+#получение json файла с группами
 def get_groups():
     data = {
             'filiation_id': filial_id
