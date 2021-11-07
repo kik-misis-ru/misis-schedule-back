@@ -42,7 +42,7 @@ async def add_user_handler(user: User):
 #возращает данные о пользователе по его id
 @app.get('/users')
 async def get_user_handler(user_id: str):
-    return get_user(user_id)
+    return await get_user(user_id)
 
 #возврвщает расписание по id пользователя (используется при загрузке приложения)
 @app.get('/schedule_by_user_id')
