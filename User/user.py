@@ -1,6 +1,6 @@
 from scheme import *
 from Schedule.schedule import *
-from Database.mongo import MongoRepository
+from DataBase.mongo import MongoRepository
 
 mongo_repository = MongoRepository()
 async def add_user(user: User):

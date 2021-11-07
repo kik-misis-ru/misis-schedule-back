@@ -2,7 +2,7 @@
 from scheme import *
 from utils import *
 from English.english import *
-from Database.mongo import MongoRepository
+from DataBase.mongo import MongoRepository
 
 mongo_repository = MongoRepository()
 
