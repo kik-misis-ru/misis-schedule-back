@@ -9,6 +9,8 @@ import random
 from dotenv import load_dotenv
 import uuid
 import time
+import Schedule
+from main import  mongo_repository
 
 
 load_dotenv()
@@ -22,19 +24,23 @@ app_id_sber_code=os.getenv("APP_ID_SBER_CODE")
 version_id_app_sber_code=os.getenv("VERSION_ID_APP_SBER_CODE")
 
 
-def push():
-    sub = "noN0Crr3wgIDB0zPleKresJJBnQWbTybFS96aH/CO1ag1UKZFmqfjY9pgDfQAAv8DJiarMJBCd+OSKUzNTk2jw0W/jbBIC6V/xwQdmSX5cA3bAbhWkZVtK9z3zFc8Mkh3O1nZa/qn3SAagVDNjZIB6p4Z9Wzb0Lm/uzDjpy3qh0="
-    templateData = PushTemplate("Завтра", "5", "пар", "9:00")
-    start_time = datetime.now() + timedelta(minutes=1)
-    finish_time = datetime.now() +timedelta(minutes=2)
-    start_date = datetime.today()
-    end_date =datetime.today()
-    send_push(sub, templateData, start_time, finish_time, start_date, end_date)
+async def push():
+	push_hour = datetime.now().hour + 1
+	subs = await mongo_repository.get_subs_for_push(push_hour)
+	for sub in subs:
+		print(sub)
+	sub = "noN0Crr3wgIDB0zPleKresJJBnQWbTybFS96aH/CO1ag1UKZFmqfjY9pgDfQAAv8DJiarMJBCd+OSKUzNTk2jw0W/jbBIC6V/xwQdmSX5cA3bAbhWkZVtK9z3zFc8Mkh3O1nZa/qn3SAagVDNjZIB6p4Z9Wzb0Lm/uzDjpy3qh0="
+	templateData = PushTemplate("Завтра", "5", "пар", "9:00")
+	start_time = datetime.now() + timedelta(minutes=1)
+	finish_time = datetime.now() + timedelta(minutes=2)
+	start_date = datetime.today() + timedelta(hours=24)
+	end_date = start_date
+	send_push(sub, templateData, start_time, finish_time, start_date, end_date)
 
-def run_push():
+async def run_push():
 	while(True):
-		#push()
-		time.sleep(100)
+		await push()
+		time.sleep(1000)
 
 def send_push(sub: str, templateData: PushTemplate, start_time: datetime, finish_time: datetime, start_date: date, end_date:date):
     data = get_body_for_send_push(sub, templateData, start_time, finish_time, start_date, end_date)

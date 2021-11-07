@@ -8,6 +8,7 @@ from Group.group import *
 from User.user import *
 from PushNotifications.Push import *
 from threading import Thread
+import asyncio
 
 app = FastAPI()
 
@@ -20,10 +21,6 @@ app.add_middleware(
 )
 
 mongo_repository = MongoRepository()
-
-th = Thread(target=run_push)
-th.start()
-
 
 
 #возвращает расписание по дате, id-группы и id-группы по английскому
@@ -82,6 +79,17 @@ async def group_by_name_handler(name):
 @app.get("/is_english_group_exist")
 async def is_english_group_exist_handler(group_num):
     return JSONEncoder().encode(await is_english_group_exist(group_num))
+
+@app.post("/add_user_to_push_notification")
+async  def add_user_to_push_notification_handler(user_push: UserPush):
+    result = await mongo_repository.add_user_to_push(user_push)
+    response = dict()
+    if result.acknowledged:
+        response["status"] = status_code_success
+    else:
+        response["status"] = status_code_error
+    return  response
+
 
 
 

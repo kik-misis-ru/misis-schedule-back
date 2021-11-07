@@ -47,3 +47,8 @@ class PushTemplate:
     count_lesson: str
     lesson: str
     start_time: str
+
+class UserPush(BaseModel):
+    sub: str
+    hour: int
+    minute: int
