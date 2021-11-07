@@ -100,6 +100,7 @@ class MongoRepository:
             group_to_db['createdAt'] = createdAt
             group_to_db['number'] = group
             groups_to_db.append(group_to_db)
+            
         return await self.collection_english_group_list.insert_many(groups_to_db)
     async def delete_english_group_list(self):
         return await self.collection_english_group_list.delete_many({})
