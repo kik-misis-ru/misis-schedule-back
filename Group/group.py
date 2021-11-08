@@ -39,6 +39,7 @@ async def is_english_group_exist(group_num):
         response["status"] = status_code_success
     else:
         response["status"] = status_code_not_found
+    print(response)
     return response
 
 async def load_english_groups():
