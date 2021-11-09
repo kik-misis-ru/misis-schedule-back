@@ -2,9 +2,10 @@ from scheme import *
 from utils import *
 from English.english import *
 from Schedule.schedule import *
-from DataBase.mongo import MongoRepository
+# from DataBase.mongo import MongoRepository
 
-mongo_repository = MongoRepository()
+# mongo_repository = MongoRepository()
+from main import mongo_repository
 
 
 

@@ -10,7 +10,12 @@ from dotenv import load_dotenv
 import uuid
 import time
 import Schedule
-from main import  mongo_repository
+from DataBase.mongo import MongoRepository
+from Schedule.schedule import *
+from User.user import *
+from utils import Days, Bells
+# mongo_repository = MongoRepository()
+from main import mongo_repository
 
 
 load_dotenv()
@@ -20,27 +25,29 @@ send_push_url = os.getenv("SEND_PUSH_URL")
 auth_sber_url = os.getenv("AUTH_SBER_URL")
 client_id_secret_id_base64 = os.getenv("CLIENT_ID_CLIENT_SECRET_BASE64")
 project_id_sber_code=os.getenv("PROJECT_ID_SBER_CODE")
-app_id_sber_code=os.getenv("APP_ID_SBER_CODE")
-version_id_app_sber_code=os.getenv("VERSION_ID_APP_SBER_CODE")
 
 
-async def push():
-	push_hour = datetime.now().hour + 1
-	subs = await mongo_repository.get_subs_for_push(push_hour)
-	for sub in subs:
-		print(sub)
-	sub = "noN0Crr3wgIDB0zPleKresJJBnQWbTybFS96aH/CO1ag1UKZFmqfjY9pgDfQAAv8DJiarMJBCd+OSKUzNTk2jw0W/jbBIC6V/xwQdmSX5cA3bAbhWkZVtK9z3zFc8Mkh3O1nZa/qn3SAagVDNjZIB6p4Z9Wzb0Lm/uzDjpy3qh0="
-	templateData = PushTemplate("Завтра", "5", "пар", "9:00")
-	start_time = datetime.now() + timedelta(minutes=1)
-	finish_time = datetime.now() + timedelta(minutes=2)
-	start_date = datetime.today() + timedelta(hours=24)
+async def push(data):
+	sub = data["sub"]
+	templateData = await get_data_for_push(sub)
+	start_time = datetime.today()
+	start_time = start_time.replace(hour=data['hour'], minute=data['minute'], second=0, microsecond=0)
+	finish_time = start_time + timedelta(minutes=1)
+	start_date = datetime.today()
 	end_date = start_date
+	await get_data_for_push(sub)
 	send_push(sub, templateData, start_time, finish_time, start_date, end_date)
 
 async def run_push():
-	while(True):
-		await push()
-		time.sleep(1000)
+	start = datetime.now()
+	push_hour = datetime.now().hour + 1
+	#subs =  mongo_repository.get_subs_for_push(push_hour)
+	#subslist = await subs.to_list(None)
+	#for sub in subslist:
+	#	await push(sub)
+	delta = datetime.now() -start
+	time.sleep(3600 - delta.total_seconds())
+
 
 def send_push(sub: str, templateData: PushTemplate, start_time: datetime, finish_time: datetime, start_date: date, end_date:date):
     data = get_body_for_send_push(sub, templateData, start_time, finish_time, start_date, end_date)
@@ -48,7 +55,7 @@ def send_push(sub: str, templateData: PushTemplate, start_time: datetime, finish
 
     response = requests.post(send_push_url, data=json.dumps(data), headers=headers)
     
-    print(response.status_code)
+    print(response.text)
 
 def get_auth_token():
     headers={'Authorization': 'Basic '+client_id_secret_id_base64, 'Content-type': 'application/x-www-form-urlencoded', 'RqUID': get_guid()}
@@ -59,20 +66,21 @@ def get_auth_token():
 
 
 def get_guid():
-    return  str(uuid.uuid4())
+	guid = str(uuid.uuid4())
+	return guid
 
 def get_body_for_send_push(sub: str, templateData: PushTemplate, start_time: datetime, finish_time: datetime, start_date: date, end_date:date):
 	body = {
 	"requestPayload": {
 		"protocolVersion": "V1",
-		"messageId": 37284759,#random.randint(0, 1000000),
+		"messageId": random.randint(0, 1000000),
 		"messageName": "SEND_PUSH",
 		"payload": {
 			"sender": {
                 "projectId":project_id_sber_code,
 				"application": {
-					"appId": app_id_sber_code,
-					"versionId": version_id_app_sber_code
+					"appId": project_id_sber_code,
+					"versionId": project_id_sber_code
 				}
 			},
 			"recipient": {
@@ -92,19 +100,19 @@ def get_body_for_send_push(sub: str, templateData: PushTemplate, start_time: dat
 							},
 							"bodyValues": {
 							    "day": templateData.day,
-								"count_lessons": templateData.count_lesson,
+								"count_lessons": str(templateData.count_lesson),
 								"lesson": templateData.lesson,
                                 "start_time":templateData.start_time
 							},
 							"mobileAppParameters": {
 							},
 							"timeFrame": {
-								"startTime": start_time.strftime("%H:%M:%S"),
-								"finishTime": finish_time.strftime("%H:%M:%S"),
-								"timeZone": "GMT+03:00",
-								"startDate": start_date.strftime("%Y:%m:%d"),
-								"endDate": end_date.strftime("%Y:%m:%d")
-							}
+							 	"startTime": start_time.strftime("%H:%M:%S"),
+							 	"finishTime": finish_time.strftime("%H:%M:%S"),
+							 	"timeZone": "GMT+03:00",
+							 	"startDate": start_date.strftime("%Y-%m-%d"),
+							 	"endDate": end_date.strftime("%Y-%m-%d")
+							 }
 						}
 					}
 				]
@@ -113,3 +121,29 @@ def get_body_for_send_push(sub: str, templateData: PushTemplate, start_time: dat
 	}
 	}
 	return body
+
+
+async def get_data_for_push(sub):
+	user_data = await get_user(sub)
+	group_id = user_data["group_id"]
+	count_lessons = 0
+	start_time =""
+	day_num = datetime.today().isoweekday()
+	day_schedule = Days[day_num] 
+	sub_group = user_data["subgroup_name"]
+	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
+	schedule = scheduleData["schedule"]
+	for bell in Bells:
+		if(bell in schedule):
+			day = schedule[bell][day_schedule]
+			if(len(day["lessons"])):
+				count_lessons+=1
+				if(start_time==""):
+					start_time = schedule[bell]["header"]["start_lesson"]
+	templateData = PushTemplate("Завтра", count_lessons, "пар", start_time)
+	return templateData
+
+	
+
+
+

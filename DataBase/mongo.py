@@ -110,6 +110,5 @@ class MongoRepository:
         return await self.collection_english_group_list.find_one({"number": group_num})
     async  def add_user_to_push(self,user_push: UserPush):
         return  await self.collection_users_with_push.insert_one(dict(user_push))
-    async def get_subs_for_push(self, hour: int):
-        return 1
-       # return await self.collection_users_with_push.find_one({"hour": hour}))
+    def get_subs_for_push(self, hour: int):
+       return  self.collection_users_with_push.find({'hour':hour})

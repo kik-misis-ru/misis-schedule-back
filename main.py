@@ -22,6 +22,12 @@ app.add_middleware(
 
 mongo_repository = MongoRepository()
 
+#asyncio.create_task(run_push())
+
+
+@app.get('/')
+async def start():
+    return
 
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
@@ -89,6 +95,7 @@ async  def add_user_to_push_notification_handler(user_push: UserPush):
     else:
         response["status"] = status_code_error
     return  response
+
 
 
 
