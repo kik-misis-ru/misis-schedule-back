@@ -9,6 +9,7 @@ from User.user import *
 from PushNotifications.Push import *
 from threading import Thread
 import asyncio
+from scheme import DataForPush
 
 app = FastAPI()
 
@@ -22,12 +23,14 @@ app.add_middleware(
 
 mongo_repository = MongoRepository()
 
-#asyncio.create_task(run_push())
 
+#asyncio.create_task(run_push())
 
 @app.get('/')
 async def start():
-    return
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(await run_push())
+
 
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
@@ -59,6 +62,8 @@ async def get_schedule_by_sub(user_id: str):
 #возвращает данные о пользователи по его инициалам
 @app.get('/teacher')
 async def get_teacher_handler(teacher_initials): 
+    print(1)
+    return 1
     return JSONEncoder().encode(await get_teacher(teacher_initials))
 
 #возвращает инициалы преподаватели по его id
@@ -88,13 +93,17 @@ async def is_english_group_exist_handler(group_num):
 
 @app.post("/add_user_to_push_notification")
 async  def add_user_to_push_notification_handler(user_push: UserPush):
-    result = await mongo_repository.add_user_to_push(user_push)
-    response = dict()
-    if result.acknowledged:
-        response["status"] = status_code_success
-    else:
-        response["status"] = status_code_error
-    return  response
+    return await add_user_to_push(user_push)
+    
+
+@app.post("/get_data_for_push")
+async def  get_data_for_push_handle(sub: DataForPush):
+    return await get_data_for_push(sub.sub)
+
+@app.get("/get_subs_for_push")
+async def get_subs_for_push_handler(hour: int):
+    return await get_subs_for_push(hour)
+
 
 
 

@@ -68,6 +68,7 @@ class MongoRepository:
         self.collection_schedule_teacher.insert_many(teachers_info)
 
     async def find_teacher(self, fio):
+        print(3)
         return await self.collection_teachers.find_one({'last_name': fio.last_name, 'first_name': fio.first_name, 'mid_name':fio.mid_name})
     
     async def find_teacher_id(self, teacher_id):

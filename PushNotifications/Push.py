@@ -41,10 +41,11 @@ async def push(data):
 async def run_push():
 	start = datetime.now()
 	push_hour = datetime.now().hour + 1
-	#subs =  mongo_repository.get_subs_for_push(push_hour)
-	#subslist = await subs.to_list(None)
-	#for sub in subslist:
-	#	await push(sub)
+	subs =  mongo_repository.get_subs_for_push(9)
+	subslist = await subs.to_list(None)
+	for sub in subslist:
+		print(sub)
+		await push(sub)
 	delta = datetime.now() -start
 	time.sleep(3600 - delta.total_seconds())
 
@@ -124,13 +125,15 @@ def get_body_for_send_push(sub: str, templateData: PushTemplate, start_time: dat
 
 
 async def get_data_for_push(sub):
+	print("sub", sub)
+
 	user_data = await get_user(sub)
+	print("user_data", user_data)
 	group_id = user_data["group_id"]
 	count_lessons = 0
 	start_time =""
 	day_num = datetime.today().isoweekday()
 	day_schedule = Days[day_num] 
-	sub_group = user_data["subgroup_name"]
 	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
 	schedule = scheduleData["schedule"]
 	for bell in Bells:

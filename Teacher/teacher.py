@@ -22,7 +22,9 @@ async def get_teacher(teacher_initials):
         mongo_repository.fill_teachers(teachers_info)
         response = find_teahcer
         return response
+    print(2)
     teacher_from_db = await mongo_repository.find_teacher(fio)
+    print(4)
     if teacher_from_db is not None:
         response = teacher_from_db
         response["status"]=status_code_success
