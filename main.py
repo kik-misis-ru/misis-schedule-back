@@ -87,17 +87,17 @@ async def is_english_group_exist_handler(group_num):
 
 @app.post("/add_user_to_push_notification")
 async  def add_user_to_push_notification_handler(user_push: UserPush):
-    return await add_user_to_push(user_push)
+    return JSONEncoder().encode(await add_user_to_push(user_push))
     
 
 @app.post("/get_data_for_push")
 async def  get_data_for_push_handle(sub: DataForPush):
-    return await get_data_for_push(sub.sub)
+    return JSONEncoder().encode(await get_data_for_push(sub.sub))
      
 
 @app.get("/get_subs_for_push")
 async def get_subs_for_push_handler(hour: int):
-    return await get_subs_for_push(hour)
+    return JSONEncoder().encode(await get_subs_for_push(hour))
 
 
 

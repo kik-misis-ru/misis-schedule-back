@@ -12,6 +12,7 @@ from main import mongo_repository
 
 async def get_teacher(teacher_initials):
     fio =  get_initials_from_str(teacher_initials)
+    print("fio", fio)
     response = dict()
     if(fio ==-1):
         response['status']= status_code_error
@@ -22,15 +23,14 @@ async def get_teacher(teacher_initials):
         mongo_repository.fill_teachers(teachers_info)
         response = find_teahcer
         return response
-    print(2)
     teacher_from_db = await mongo_repository.find_teacher(fio)
-    print(4)
     if teacher_from_db is not None:
         response = teacher_from_db
         response["status"]=status_code_success
         response["createdAt"] = str(response["createdAt"])
         return response
     response["status"]=status_code_not_found
+    return response
 
 async def get_teacher_initials(teacher_id):
     count_rows = await mongo_repository.teachers_count()
