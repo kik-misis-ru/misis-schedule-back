@@ -56,8 +56,6 @@ async def get_schedule_by_sub(user_id: str):
 #возвращает данные о пользователи по его инициалам
 @app.get('/teacher')
 async def get_teacher_handler(teacher_initials): 
-    print(1)
-    return 1
     return JSONEncoder().encode(await get_teacher(teacher_initials))
 
 #возвращает инициалы преподаватели по его id
