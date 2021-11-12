@@ -9,9 +9,9 @@
 3. Добавляем заполняем .env реальными данными.
 4. Создаем виртуальное окружение:
   > python virtualenv venv
-4. Активируем виртуальное окружение.
+5. Активируем виртуальное окружение.
   > venv\Scripts\activate
-5. Устанавливаем модули из файла requirements.txt:
+6. Устанавливаем модули из файла requirements.txt:
   > pip install -r requirements.txt
-9. Запускаем сервер (--reload - опционально):
+7. Запускаем сервер (--reload - опционально):
   >uvicorn main:app --reload 
