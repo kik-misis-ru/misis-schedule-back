@@ -65,36 +65,43 @@ async def get_teacher_handler(teacher_initials):
 async def get_teacher_initials_handler(teacher_id):
     return JSONEncoder().encode( await get_teacher_initials(teacher_id))
 
+#обновляет учебные группы в базе данных (по данным из api)
 @app.get("/load_groups")
 async def load_groups_handler():
    return JSONEncoder().encode(await load_groups())
 
+#обновляет группы по английскому в базе данных (по данным из googleSheets)
 @app.get("/load_english_groups")
 async def load_english_groups_handler():
     return JSONEncoder().encode(await load_english_groups())
     
+#получение учебной группы по id
 @app.get("/group_by_id")
 async def group_by_id_handler(group_id):
     return JSONEncoder().encode(await group_by_id(group_id))
 
+#получение учебной группы по е имени
 @app.get("/group_by_name")
 async def group_by_name_handler(name):
     return JSONEncoder().encode(await group_by_name(name))
 
+#проверка сузествования группы по английскому
 @app.get("/is_english_group_exist")
 async def is_english_group_exist_handler(group_num):
     return JSONEncoder().encode(await is_english_group_exist(group_num))
 
+#добавление пуш-нотификаций для пользователя
 @app.post("/add_user_to_push_notification")
 async  def add_user_to_push_notification_handler(user_push: UserPush):
     return JSONEncoder().encode(await add_user_to_push(user_push))
     
-
+#получение данных для отправки пуш-нотификаций по sub пользователя
 @app.post("/get_data_for_push")
 async def  get_data_for_push_handle(sub: DataForPush):
     return JSONEncoder().encode(await get_data_for_push(sub.sub))
      
-
+#получение списка sub-ов пользователей,
+#которым надо отправить пуш в переданный час
 @app.get("/get_subs_for_push")
 async def get_subs_for_push_handler(hour: int):
     return JSONEncoder().encode(await get_subs_for_push(hour))
