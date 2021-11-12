@@ -63,7 +63,7 @@ async def get_teacher_handler(teacher_initials):
 #возвращает инициалы преподаватели по его id
 @app.get("/teacher_initials")
 async def get_teacher_initials_handler(teacher_id):
-    return JSONEncoder().encode( await get_teacher(teacher_id))
+    return JSONEncoder().encode( await get_teacher_initials(teacher_id))
 
 @app.get("/load_groups")
 async def load_groups_handler():
