@@ -77,10 +77,9 @@ def get_groups():
 
 #выполненяет проверку и исправление ошибок с подгруппами в расписании
 def check_sub_groups(schedule_dict):
-    subgroups =dict()
-    
-    if("schedule" not in schedule_dict):
+    if "status" not in schedule_dict or schedule_dict["status"] == "NOT_FOUND" or "schedule" not in schedule_dict:
         return schedule_dict
+    subgroups =dict()
     schedule = schedule_dict["schedule"]    
     for bell in Bells:
         if not bell in schedule:

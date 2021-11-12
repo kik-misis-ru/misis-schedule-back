@@ -1,4 +1,6 @@
 from datetime import date
+
+from requests.models import Response
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from  DataBase.mongo import MongoRepository
@@ -56,8 +58,6 @@ async def get_schedule_by_sub(user_id: str):
 #возвращает данные о пользователи по его инициалам
 @app.get('/teacher')
 async def get_teacher_handler(teacher_initials): 
-    print(1)
-    return 1
     return JSONEncoder().encode(await get_teacher(teacher_initials))
 
 #возвращает инициалы преподаватели по его id
@@ -93,6 +93,7 @@ async  def add_user_to_push_notification_handler(user_push: UserPush):
 @app.post("/get_data_for_push")
 async def  get_data_for_push_handle(sub: DataForPush):
     return await get_data_for_push(sub.sub)
+     
 
 @app.get("/get_subs_for_push")
 async def get_subs_for_push_handler(hour: int):
