@@ -24,12 +24,6 @@ app.add_middleware(
 mongo_repository = MongoRepository()
 
 
-#asyncio.create_task(run_push())
-
-@app.get('/')
-async def start():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(await run_push())
 
 
 #возвращает расписание по дате, id-группы и id-группы по английскому
