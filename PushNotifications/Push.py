@@ -16,6 +16,7 @@ async def get_data_for_push(sub):
 	count_lessons = 0
 	start_time =""
 	day_num = datetime.today().isoweekday()
+	print(day_num)
 	if (day_num == 7):
 		response["day"] = "Завтра"
 		response["count_lessons"] = 0
