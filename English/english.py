@@ -52,6 +52,8 @@ def get_enslish_schedule(group_id):
 #встраивает расписание по английскому в основное расписание
 def set_english_info_to_schedule(schedule_dict, eng_schedule):
     schedule = schedule_dict["schedule"]
+    if not schedule:
+        return schedule_dict
     count=0
     for bell in Bells:
         if not bell in schedule:
