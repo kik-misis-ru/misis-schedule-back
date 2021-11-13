@@ -104,7 +104,7 @@ async def  get_data_for_push_handle(sub: DataForPush):
 #которым надо отправить пуш в переданный час
 @app.get("/get_subs_for_push")
 async def get_subs_for_push_handler(hour: int):
-    return JSONEncoder().encode(await get_subs_for_push(hour))
+    return await get_subs_for_push(hour)
 
 
 
