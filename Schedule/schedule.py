@@ -34,21 +34,26 @@ async def get_teacher_schedule(teacher_id, date):
         mongo_repository.create_teacher_schedule(schedule)
         return schedule
 async def get_schedule_by_user_id(user_id: str):
-    response = await mongo_repository.find_user(user_id)
-    group = await mongo_repository.get_group_by_id(response["group_id"])
-    response["groupName"] = group["name"]
-    date = datetime.today().strftime('%Y-%m-%d')
-    if "teacher_id" in response and response["teacher_id"] != "":
-        teacher_id = response["teacher_id"]
-        response["schedule"] = await get_teacher_schedule(teacher_id, date)
-        teacher_info= await mongo_repository.find_teacher_id(teacher_id)
-        response["teacher_info"] = dict()
-        response["teacher_info"]["first_name"] = teacher_info["first_name"]
-        response["teacher_info"]["last_name"] = teacher_info["last_name"]
-        response["teacher_info"]["mid_name"] = teacher_info["mid_name"]
+    response = dict()
+    user_response = await mongo_repository.find_user(user_id)
+    if user_response:
+        response["status"] = status_code_success
+        group = await mongo_repository.get_group_by_id(user_response["group_id"])
+        response["groupName"] = group["name"]
+        date = datetime.today().strftime('%Y-%m-%d')
+        if "teacher_id" in response and response["teacher_id"] != "":
+            teacher_id = response["teacher_id"]
+            response["schedule"] = await get_teacher_schedule(teacher_id, date)
+            teacher_info= await mongo_repository.find_teacher_id(teacher_id)
+            response["teacher_info"] = dict()
+            response["teacher_info"]["first_name"] = teacher_info["first_name"]
+            response["teacher_info"]["last_name"] = teacher_info["last_name"]
+            response["teacher_info"]["mid_name"] = teacher_info["mid_name"]
+        else:
+            group_id = user_response["group_id"]
+            english_group_id = user_response["eng_group"]
+            schedule =  await get_schedule(group_id, english_group_id, date)
+            response["schedule"] = schedule
     else:
-        group_id = response["group_id"]
-        english_group_id = response["eng_group"]
-        schedule =  await get_schedule(group_id, english_group_id, date)
-        response["schedule"] = schedule
+        response["status"] = status_code_not_found
     return response
