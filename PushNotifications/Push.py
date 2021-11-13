@@ -16,6 +16,12 @@ async def get_data_for_push(sub):
 	count_lessons = 0
 	start_time =""
 	day_num = datetime.today().isoweekday()
+	if (day_num == 7):
+		response["day"] = "Завтра"
+		response["count_lessons"] = 0
+		response["lesson"] = "пар"
+		response["start_time"] = "0"
+		response["status"] = status_code_success
 	day_schedule = Days[day_num] 
 	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
 	if "status" in scheduleData and scheduleData["status"] == "FOUND":
