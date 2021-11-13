@@ -22,6 +22,7 @@ async def get_data_for_push(sub):
 		response["lesson"] = "пар"
 		response["start_time"] = "0"
 		response["status"] = status_code_success
+		return response
 	day_schedule = Days[day_num] 
 	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
 	if "status" in scheduleData and scheduleData["status"] == "FOUND":
