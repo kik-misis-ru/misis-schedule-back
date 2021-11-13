@@ -98,7 +98,7 @@ async  def add_user_to_push_notification_handler(user_push: UserPush):
 #получение данных для отправки пуш-нотификаций по sub пользователя
 @app.post("/get_data_for_push")
 async def  get_data_for_push_handle(sub: DataForPush):
-    return JSONEncoder().encode(await get_data_for_push(sub.sub))
+    return await get_data_for_push(sub.sub)
      
 #получение списка sub-ов пользователей,
 #которым надо отправить пуш в переданный час
