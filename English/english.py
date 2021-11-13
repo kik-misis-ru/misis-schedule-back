@@ -51,31 +51,32 @@ def get_enslish_schedule(group_id):
 
 #встраивает расписание по английскому в основное расписание
 def set_english_info_to_schedule(schedule_dict, eng_schedule):
-    schedule = schedule_dict["schedule"]
-    if not schedule:
-        return schedule_dict
-    count=0
-    for bell in Bells:
-        if not bell in schedule:
-            continue
-        schedule_bell = schedule[bell]
-        for day in Days:
-            if not day in schedule_bell:
+    if schedule_dict and "schedule" in schedule_dict:
+        schedule = schedule_dict["schedule"]
+        if not schedule:
+            return schedule_dict
+        count=0
+        for bell in Bells:
+            if not bell in schedule:
                 continue
-            schedule_day = schedule_bell[day]
-            if len(schedule_day["lessons"])==0:
-                continue
-            for i in range(len(schedule_day["lessons"])):
-                lesson = schedule_day["lessons"][i]
-                if  lesson["subject_id"]==english_subject_id:
-                    if(len(eng_schedule['classes'])>count):
-                        lesson["room_name"]=eng_schedule['classes'][count]
-                    if(len(lesson['teachers'])>0):
-                        lesson['teachers'][0]['name']=eng_schedule['teacher']
-                    if(len(lesson['rooms'])>0):
+            schedule_bell = schedule[bell]
+            for day in Days:
+                if not day in schedule_bell:
+                    continue
+                schedule_day = schedule_bell[day]
+                if len(schedule_day["lessons"])==0:
+                    continue
+                for i in range(len(schedule_day["lessons"])):
+                    lesson = schedule_day["lessons"][i]
+                    if  lesson["subject_id"]==english_subject_id:
                         if(len(eng_schedule['classes'])>count):
-                            lesson['rooms'][0]['name']=eng_schedule['classes'][count]
-                    count+=1
+                            lesson["room_name"]=eng_schedule['classes'][count]
+                        if(len(lesson['teachers'])>0):
+                            lesson['teachers'][0]['name']=eng_schedule['teacher']
+                        if(len(lesson['rooms'])>0):
+                            if(len(eng_schedule['classes'])>count):
+                                lesson['rooms'][0]['name']=eng_schedule['classes'][count]
+                        count+=1
     return schedule_dict
     
 #выполняет получение расписания по английскому и встраивание его в основное расписание
