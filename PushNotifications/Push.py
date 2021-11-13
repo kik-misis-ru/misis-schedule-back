@@ -28,6 +28,7 @@ async def get_data_for_push(sub):
 	count_lessons = 0
 	start_time =""
 	current_date = datetime.today() + timedelta(hours=int(heroku_time_diff))
+	print(current_date)
 	day_num = current_date.isoweekday()
 	if (day_num == 7):
 		response["day"] = "Завтра"
