@@ -5,6 +5,18 @@ from scheme import *
 from Schedule.schedule import *
 from User.user import *
 from utils import Days, Bells
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv()
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+
+heroku_time_diff = os.getenv("HEROKU_TIME_DIFF")
+client = AsyncIOMotorClient(url)
+
+
 
 async def get_data_for_push(sub):
 	response = dict()
@@ -15,8 +27,8 @@ async def get_data_for_push(sub):
 	group_id = user_data["group_id"]
 	count_lessons = 0
 	start_time =""
-	day_num = datetime.today().isoweekday()
-	print(day_num)
+	current_date = datetime.today() + timedelta(hours=heroku_time_diff)
+	day_num = current_date.isoweekday()
 	if (day_num == 7):
 		response["day"] = "Завтра"
 		response["count_lessons"] = 0
