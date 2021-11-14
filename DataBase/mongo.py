@@ -123,4 +123,7 @@ class MongoRepository:
              return  await self.collection_users_with_push.insert_one(dict(user_push))
        
     def get_subs_for_push(self, hour: int):
-       return  self.collection_users_with_push.find({'hour':hour, 'isActive': True})
+       return self.collection_users_with_push.find({'hour':hour, 'isActive': True})
+
+    def async_get_push_info_user(self, sub: str):
+        return self.collection_users_with_push.find_one({'sub': sub}) 

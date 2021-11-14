@@ -33,6 +33,7 @@ async def get_teacher_schedule(teacher_id, date):
         schedule["createdAt"] = str(datetime.utcnow())
         mongo_repository.create_teacher_schedule(schedule)
         return schedule
+
 async def get_schedule_by_user_id(user_id: str):
     response = dict()
     user_response = await mongo_repository.find_user(user_id)
@@ -40,6 +41,15 @@ async def get_schedule_by_user_id(user_id: str):
         response["status"] = status_code_success
         group = await mongo_repository.get_group_by_id(user_response["group_id"])
         response["groupName"] = group["name"]
+        push_data = await mongo_repository.async_get_push_info_user(user_id)
+        if push_data:
+            response['isActive'] = push_data['isActive']
+            response['hour'] = push_data['hour']
+            response['minute'] = push_data['minute']
+        else:
+            response['isActive'] = False
+            response['hour'] = status_code_not_found
+            response['minute'] = status_code_not_found
         date = datetime.today().strftime('%Y-%m-%d')
         if "teacher_id" in response and response["teacher_id"] != "":
             teacher_id = response["teacher_id"]
