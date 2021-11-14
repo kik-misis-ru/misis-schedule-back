@@ -109,6 +109,18 @@ class MongoRepository:
     async def find_english_group(self, group_num):
         return await self.collection_english_group_list.find_one({"number": group_num})
     async  def add_user_to_push(self,user_push: UserPush):
-        return  await self.collection_users_with_push.insert_one(dict(user_push))
+        response = await self.collection_users_with_push.find_one({"sub": user_push.sub})
+        if response:
+            return await self.collection_users_with_push.update_one({"sub": user_push.sub},
+             {"$set":
+                                         {"hour": user_push.hour,
+                                          "minute": user_push.minute,
+                                          "isActive": user_push.isActive
+                                          }
+
+                                     })
+        else:
+             return  await self.collection_users_with_push.insert_one(dict(user_push))
+       
     def get_subs_for_push(self, hour: int):
-       return  self.collection_users_with_push.find({'hour':hour})
+       return  self.collection_users_with_push.find({'hour':hour, 'isActive': True})
