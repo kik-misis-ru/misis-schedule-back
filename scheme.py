@@ -52,6 +52,7 @@ class UserPush(BaseModel):
     sub: str
     hour: int
     minute: int
+    isActive: bool
 
 class DataForPush(BaseModel):
     sub:str

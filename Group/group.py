@@ -9,6 +9,9 @@ mongo_repository = MongoRepository()
 
 async def group_by_id(group_id):
     response = dict()
+    if group_id == "NaN":
+        response["status"] = status_code_not_found
+        return response
     group = await mongo_repository.get_group_by_id(group_id)
     if group:
          response['id'] = group['id']

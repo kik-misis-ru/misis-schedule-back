@@ -11,6 +11,7 @@ async def add_user(user: User):
 
 async def get_user(user_id: str):
     response = await mongo_repository.find_user(user_id)
+    print("response:", response)
     if response:
         result = get_user_info(response)
         return result
