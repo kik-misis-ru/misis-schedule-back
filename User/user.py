@@ -19,6 +19,7 @@ async def get_user(user_id: str):
         return "0"
 
 async def add_user_to_push(user_push: UserPush):
+    print(user_push)
     result = await mongo_repository.add_user_to_push(user_push)
     response = dict()
     if result.acknowledged:
