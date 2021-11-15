@@ -36,6 +36,7 @@ async def get_data_for_push(sub):
 		return response
 
 	teacher_id = user_data["teacher_id"]
+	print("teacher_id", teacher_id)
 	if teacher_id!=None and teacher_id!="":
 		scheduleData = await get_teacher_schedule(teacher_id, current_date.strftime("%Y-%m-%d"))
 	else:

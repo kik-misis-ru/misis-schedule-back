@@ -53,6 +53,7 @@ async def get_schedule_by_user_id(user_id: str):
         date = datetime.today().strftime('%Y-%m-%d')
         if "teacher_id" in user_response and user_response["teacher_id"] != "":
             teacher_id = user_response["teacher_id"]
+            response["teacher_id"] = teacher_id
             response["schedule"] = await get_teacher_schedule(teacher_id, date)
             teacher_info= await mongo_repository.find_teacher_id(teacher_id)
             response["teacher_info"] = dict()
