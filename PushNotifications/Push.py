@@ -23,11 +23,9 @@ async def get_data_for_push(sub):
 	if(user_data == "0"):
 		response["status"] = status_code_not_found
 		return response
-	group_id = user_data["group_id"]
 	count_lessons = 0
-	start_time =""
+	start_time = ""
 	current_date = datetime.today() + timedelta(hours=int(heroku_time_diff))
-	print(current_date)
 	day_num = current_date.isoweekday()
 	if (day_num == 6):
 		response["day"] = "Завтра"
@@ -36,9 +34,15 @@ async def get_data_for_push(sub):
 		response["start_time"] = "0"
 		response["status"] = status_code_success
 		return response
+
+	teacher_id = user_data["teacher_id"]
+	if teacher_id!=None and teacher_id!="":
+		scheduleData = await get_teacher_schedule(teacher_id, current_date.strftime("%Y-%m-%d"))
+	else:
+		group_id = user_data["group_id"]
+		scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
 	day_schedule = Days[day_num] 
-	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
-	if "status" in scheduleData and scheduleData["status"] == "FOUND":
+	if scheduleData and "status" in scheduleData and scheduleData["status"] == "FOUND":
 		schedule = scheduleData["schedule"]
 		for bell in Bells:
 			if(bell in schedule):
