@@ -42,6 +42,7 @@ async  def get_schedule_teacher_json(teacher_id, date):
 #создает пользователя или обновляет данные о сущетсвующем
 @app.post('/users')
 async def add_user_handler(user: User):
+    print(user)
     await add_user(user)
 
 #возращает данные о пользователе по его id
