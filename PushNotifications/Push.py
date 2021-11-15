@@ -36,8 +36,6 @@ async def get_data_for_push(sub):
 		response["start_time"] = "0"
 		response["status"] = status_code_success
 		return response
-	day_num = day_num + 1
-	day_num = day_num % 7
 	day_schedule = Days[day_num] 
 	scheduleData = await get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
 	if "status" in scheduleData and scheduleData["status"] == "FOUND":
@@ -46,6 +44,7 @@ async def get_data_for_push(sub):
 			if(bell in schedule):
 				day = schedule[bell][day_schedule]
 				if(len(day["lessons"])):
+					print(day["lessons"])
 					count_lessons+=1
 					if(start_time==""):
 						start_time = schedule[bell]["header"]["start_lesson"]
