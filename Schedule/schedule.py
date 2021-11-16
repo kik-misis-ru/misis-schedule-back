@@ -1,3 +1,4 @@
+from requests.models import HTTPError
 from scheme import *
 from datetime import datetime
 from utils import *
@@ -5,6 +6,8 @@ from English.english import *
 from DataBase.mongo import MongoRepository
 
 mongo_repository = MongoRepository()
+
+heroku_time_diff = os.getenv("HEROKU_TIME_DIFF")
 
 
 async def get_schedule(group_id, english_group_id, date):
@@ -30,7 +33,7 @@ async def get_teacher_schedule(teacher_id, date):
         return response
     else:
         schedule =get_schedule_teacher_from_api(teacher_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow())
+        schedule["createdAt"] = str(datetime.utcnow()+timedelta(hours=heroku_time_diff))
         mongo_repository.create_teacher_schedule(schedule)
         return schedule
 
