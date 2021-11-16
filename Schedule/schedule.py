@@ -23,7 +23,7 @@ async def get_schedule(group_id, english_group_id, date):
         schedule["createdAt"] = datetime.utcnow()
         mongo_repository.create_schedule(schedule)
         schedule_dict = await add_english_schedule(dict(schedule), english_group_id)
-        schedule["createdAt"] = str(schedule["createdAt"])
+        schedule_dict["createdAt"] = str(schedule["createdAt"])
         return schedule_dict
 
 async def get_teacher_schedule(teacher_id, date):
