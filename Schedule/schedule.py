@@ -20,7 +20,7 @@ async def get_schedule(group_id, english_group_id, date):
         return response
     else:
         schedule = get_schedule_from_api(group_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow()+timedelta(hours=int(heroku_time_diff)))    
+        schedule["createdAt"] = datetime.utcnow()+timedelta(hours=int(heroku_time_diff))
         mongo_repository.create_schedule(schedule)
         schedule_dict = await add_english_schedule(dict(schedule), english_group_id)
         return schedule_dict
@@ -33,7 +33,7 @@ async def get_teacher_schedule(teacher_id, date):
         return response
     else:
         schedule =get_schedule_teacher_from_api(teacher_id, date_monday)
-        schedule["createdAt"] = str(datetime.utcnow()+timedelta(hours=int(heroku_time_diff)))
+        schedule["createdAt"] = datetime.utcnow()+timedelta(hours=int(heroku_time_diff))
         mongo_repository.create_teacher_schedule(schedule)
         return schedule
 
