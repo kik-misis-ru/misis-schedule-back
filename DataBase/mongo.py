@@ -6,8 +6,11 @@ import motor
 from motor.motor_asyncio import AsyncIOMotorClient
 from scheme import  UserPush
 
+
+
 class MongoRepository:
     def __init__(self):
+       
         load_dotenv()
         env_path = Path('.') / '.env'
         load_dotenv(dotenv_path=env_path)
@@ -28,7 +31,6 @@ class MongoRepository:
         return await self.collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date_monday)})
     
     def create_schedule(self, schedule):
-        print(schedule)
         self.collection_schedule.insert_one(schedule)
 
     async def get_schedule_teacher(self, teacher_id, date_monday):
