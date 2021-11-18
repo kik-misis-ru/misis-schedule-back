@@ -50,19 +50,19 @@ async def get_schedule_by_user_id(user_id: str):
             response["groupName"] = ""
         push_data = await mongo_repository.async_get_push_info_user(user_id)
         if push_data:
-            response["push"] = dict()
-            response["push"]['isActive'] = push_data['isActive']
-            response["push"]['hour'] = push_data['hour']
-            response["push"]['minute'] = push_data['minute']
+            #response["push"] = dict()
+            response['isActive'] = push_data['isActive']
+            response['hour'] = push_data['hour']
+            response['minute'] = push_data['minute']
             if "day" in push_data:
-                response["push"]['day'] = push_data['day']
+                response['day'] = push_data['day']
             else:
-                response['push']['day'] = 1
+                response['day'] = 1
         else:
-            response["push"]['isActive'] = False
-            response["push"]['hour'] = status_code_not_found
-            response["push"]['minute'] = status_code_not_found
-            response['push']['day'] = 1
+            response['isActive'] = False
+            response['hour'] = status_code_not_found
+            response['minute'] = status_code_not_found
+            response['day'] = 1
         date = datetime.today().strftime('%Y-%m-%d')
         if "teacher_id" in user_response and user_response["teacher_id"] != "":
             teacher_id = user_response["teacher_id"]
