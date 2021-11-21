@@ -36,6 +36,7 @@ async def get_teacher_schedule(teacher_id, date):
         schedule =get_schedule_teacher_from_api(teacher_id, date_monday)
         schedule["createdAt"] = datetime.utcnow()
         mongo_repository.create_teacher_schedule(schedule)
+        schedule["createdAt"] = str(datetime.utcnow())
         return schedule
 
 async def get_schedule_by_user_id(user_id: str):
