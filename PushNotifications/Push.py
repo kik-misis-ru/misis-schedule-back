@@ -27,6 +27,7 @@ async def get_data_for_push(sub):
 	start_time = ""
 	current_date = datetime.today() + timedelta(hours=int(heroku_time_diff))
 	day_num = current_date.isoweekday()
+
 	if (day_num == 6):
 		response["day"] = "Завтра"
 		response["count_lessons"] = 0
@@ -34,6 +35,8 @@ async def get_data_for_push(sub):
 		response["start_time"] = "0"
 		response["status"] = status_code_success
 		return response
+	if day_num==7:
+		day_num = 1
 
 	teacher_id = user_data["teacher_id"]
 	if teacher_id!=None and teacher_id!="":
