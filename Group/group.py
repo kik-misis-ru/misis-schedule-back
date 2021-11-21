@@ -22,7 +22,9 @@ async def group_by_id(group_id):
         response["status"] = status_code_not_found
         return response
 
-async def group_by_name(name):
+async def group_by_name(name: str):
+    name = name.strip()
+    print(name)
     response = dict()
     group = await mongo_repository.get_group_by_name(name)
     if group:
