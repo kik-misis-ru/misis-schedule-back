@@ -36,7 +36,8 @@ async def get_data_for_push(sub):
 		response["status"] = status_code_success
 		return response
 	if day_num==7:
-		day_num = 1
+		day_num = 0
+		current_date = current_date + timedelta(hours=24)
 
 	teacher_id = user_data["teacher_id"]
 	if teacher_id!=None and teacher_id!="":
