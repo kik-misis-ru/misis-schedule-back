@@ -47,6 +47,7 @@ async def get_schedule_by_user_id(user_id: str):
         if user_response["group_id"]!="":
             group = await mongo_repository.get_group_by_id(user_response["group_id"])
             response["groupName"] = group["name"]
+            response["groupId"] = user_response["group_id"]
         else:
             response["groupName"] = ""
         push_data = await mongo_repository.async_get_push_info_user(user_id)

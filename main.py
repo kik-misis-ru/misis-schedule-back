@@ -1,7 +1,5 @@
 from datetime import date
-
-from requests.models import Response
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from  DataBase.mongo import MongoRepository
 from Schedule.schedule import *
@@ -31,6 +29,7 @@ mongo_repository = MongoRepository()
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date):
+    print(group_id[1000])
     return JSONEncoder().encode(await get_schedule(group_id, english_group_id, date))
 
 #возврвщает расписание для преподавателя по его id
@@ -42,13 +41,17 @@ async  def get_schedule_teacher_json(teacher_id, date):
 #создает пользователя или обновляет данные о сущетсвующем
 @app.post('/users')
 async def add_user_handler(user: User):
-    print(user)
     await add_user(user)
 
 #возращает данные о пользователе по его id
 @app.get('/users')
-async def get_user_handler(user_id: str):
-    return await get_user(user_id)
+async def get_user_handler(user_id: str, response: Response):
+    result = await get_user(user_id)
+    if result != "0":
+        response.status_code = status.HTTP_200_OK
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+    return result
 
 #возврвщает расписание по id пользователя (используется при загрузке приложения)
 @app.get('/schedule_by_user_id')

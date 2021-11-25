@@ -1,6 +1,7 @@
 from scheme import *
 from Schedule.schedule import *
 from DataBase.mongo import MongoRepository
+from fastapi import  Response, status
 
 mongo_repository = MongoRepository()
 async def add_user(user: User):
