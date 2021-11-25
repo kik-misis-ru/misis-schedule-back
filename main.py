@@ -29,7 +29,6 @@ mongo_repository = MongoRepository()
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date):
-    print(group_id[1000])
     return JSONEncoder().encode(await get_schedule(group_id, english_group_id, date))
 
 #возврвщает расписание для преподавателя по его id
