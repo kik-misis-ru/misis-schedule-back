@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class User(BaseModel):
+class UserModel(BaseModel):
     user_id: str
     filial_id: str
     group_id: str

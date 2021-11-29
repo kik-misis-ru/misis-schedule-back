@@ -42,13 +42,13 @@ class MongoRepository:
     async def find_user(self, user_id):
         return await self.collection_users.find_one({"user_id": user_id})
 
-    def create_user(self, user):
-        self.collection_users.insert_one(user)
+    async def create_user(self, user):
+        return await  self.collection_users.insert_one(user)
     
-    def update_user(self, user):
+    async def update_user(self, user):
         if(user.group_id == "undefined"):
             return
-        self.collection_users.update_one({"user_id": user.user_id},
+        return await self.collection_users.update_one({"user_id": user.user_id},
                                     {"$set":
                                          {"filial_id": user.filial_id,
                                           "group_id": user.group_id,
