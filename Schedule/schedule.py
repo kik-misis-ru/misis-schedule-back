@@ -25,6 +25,7 @@ class Schedule:
             return response
         else:
             schedule = get_schedule_from_api(group_id, date_monday)
+            
             schedule["createdAt"] = datetime.utcnow()
             self.mongo_repository.create_schedule(schedule)
             schedule_dict = await self.english.add_english_schedule(dict(schedule), english_group_id)
