@@ -61,6 +61,8 @@ def get_teachers():
             'filiation_id': filial_id
         }
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
+    if req.status_code != 200:
+        return []
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     filial_info_json = json.loads(response)
     filial_info_dict = dict(filial_info_json)
@@ -74,6 +76,8 @@ def get_groups():
             'filiation_id': filial_id
         }
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
+    if req.status_code != 200:
+        return []
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     filial_info_json = json.loads(response)
     filial_info_dict = dict(filial_info_json)

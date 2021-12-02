@@ -3,6 +3,7 @@ from scheme import *
 from utils import *
 from English.english import *
 from DataBase.mongo import MongoRepository
+from fastapi import  status
 
 
 
@@ -59,6 +60,9 @@ class Group:
                 response["status"] = status_code_error
                 return response
         groups = self.english.get_all_english_groups()
+        if len(groups):
+            response["status"] = status_code_error
+            return response
         insert_result = await self.mongo_repository.create_english_groups(groups)
         if(len(insert_result.inserted_ids)>0):
             response["status"] = status_code_success
@@ -75,6 +79,8 @@ class Group:
                 response["status"] = status_code_error
                 return response
         groups = get_groups()
+        if len(groups) == 0:
+            response["status"] = status_code_error
         insert_result = await self.mongo_repository.create_grouplist(groups)
     
         if(len(insert_result.inserted_ids)>0):
