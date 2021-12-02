@@ -28,6 +28,10 @@ def get_schedule_from_api(group_id, date_monday):
             'start_date': date_monday
         }
     req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
+    if req.status_code !=200:
+        response = dict()
+        response["sratus"] = "NOT FOUND"
+        return response
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     schedule_json = json.loads(response)
     schedule_dict = dict(schedule_json)
@@ -41,6 +45,10 @@ def get_schedule_teacher_from_api(teacher_id, date_monday):
             'start_date':date_monday
         }
     req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
+    if req.status_code !=200:
+        response = dict()
+        response["sratus"] = "NOT FOUND"
+        return response
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     schedule_json = json.loads(response)
     schedule = dict(schedule_json)
@@ -53,6 +61,8 @@ def get_teachers():
             'filiation_id': filial_id
         }
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
+    if req.status_code != 200:
+        return []
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     filial_info_json = json.loads(response)
     filial_info_dict = dict(filial_info_json)
@@ -66,6 +76,8 @@ def get_groups():
             'filiation_id': filial_id
         }
     req = requests.post('https://login.misis.ru/method/filiation_info.get', data=data)
+    if req.status_code != 200:
+        return []
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     filial_info_json = json.loads(response)
     filial_info_dict = dict(filial_info_json)

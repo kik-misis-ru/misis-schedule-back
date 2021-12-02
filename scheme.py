@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class User(BaseModel):
+class UserModel(BaseModel):
     user_id: str
     filial_id: str
     group_id: str
@@ -52,6 +52,8 @@ class UserPush(BaseModel):
     sub: str
     hour: int
     minute: int
+    isActive: bool
+    #day: int
 
 class DataForPush(BaseModel):
     sub:str

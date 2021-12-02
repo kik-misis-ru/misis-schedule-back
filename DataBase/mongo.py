@@ -6,8 +6,11 @@ import motor
 from motor.motor_asyncio import AsyncIOMotorClient
 from scheme import  UserPush
 
+
+
 class MongoRepository:
     def __init__(self):
+       
         load_dotenv()
         env_path = Path('.') / '.env'
         load_dotenv(dotenv_path=env_path)
@@ -28,7 +31,6 @@ class MongoRepository:
         return await self.collection_schedule.find_one({"group_id": str(group_id), "start_date": str(date_monday)})
     
     def create_schedule(self, schedule):
-        print(schedule)
         self.collection_schedule.insert_one(schedule)
 
     async def get_schedule_teacher(self, teacher_id, date_monday):
@@ -40,13 +42,13 @@ class MongoRepository:
     async def find_user(self, user_id):
         return await self.collection_users.find_one({"user_id": user_id})
 
-    def create_user(self, user):
-        self.collection_users.insert_one(user)
+    async def create_user(self, user):
+        return await self.collection_users.insert_one(user)
     
-    def update_user(self, user):
+    async def update_user(self, user):
         if(user.group_id == "undefined"):
             return
-        self.collection_users.update_one({"user_id": user.user_id},
+        return await self.collection_users.update_one({"user_id": user.user_id},
                                     {"$set":
                                          {"filial_id": user.filial_id,
                                           "group_id": user.group_id,
@@ -68,6 +70,7 @@ class MongoRepository:
         self.collection_schedule_teacher.insert_many(teachers_info)
 
     async def find_teacher(self, fio):
+        #await self.collection_schedule.create_index("createdAt", expireAfterSeconds= 30)
         return await self.collection_teachers.find_one({'last_name': fio.last_name, 'first_name': fio.first_name, 'mid_name':fio.mid_name})
     
     async def find_teacher_id(self, teacher_id):
@@ -109,6 +112,21 @@ class MongoRepository:
     async def find_english_group(self, group_num):
         return await self.collection_english_group_list.find_one({"number": group_num})
     async  def add_user_to_push(self,user_push: UserPush):
-        return  await self.collection_users_with_push.insert_one(dict(user_push))
+        response = await self.collection_users_with_push.find_one({"sub": user_push.sub})
+        if response:
+            return await self.collection_users_with_push.update_one({"sub": user_push.sub},
+             {"$set":
+                                         {"hour": user_push.hour,
+                                          "minute": user_push.minute,
+                                          "isActive": user_push.isActive
+                                          }
+
+                                     })
+        else:
+             return  await self.collection_users_with_push.insert_one(dict(user_push))
+       
     def get_subs_for_push(self, hour: int):
-       return  self.collection_users_with_push.find({'hour':hour})
+       return self.collection_users_with_push.find({'hour':hour, 'isActive': True})
+
+    def async_get_push_info_user(self, sub: str):
+        return self.collection_users_with_push.find_one({'sub': sub}) 
