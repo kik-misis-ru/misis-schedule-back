@@ -56,7 +56,7 @@ async  def get_schedule_teacher_json(teacher_id, date, response: Response):
 @app.post('/users')
 async def add_user_handler(_user: UserModel, response: Response):
     result = await user.add_user(_user)
-    response.status_code = result
+    response.status_code = HTTP_201_CREATED
 
 
 #возращает данные о пользователе по его id
