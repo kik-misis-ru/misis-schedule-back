@@ -83,7 +83,7 @@ async def get_data_by_sub(user_id: str, response: Response):
 
 
 #возвращает данные о пользователи по его инициалам
-@app.get('/teacher')
+@app.get('/teacher_by_initials')
 async def get_teacher_handler(teacher_initials, response: Response): 
     result = await teacher.get_teacher(teacher_initials)
     if result['status'] == '1':
@@ -95,7 +95,7 @@ async def get_teacher_handler(teacher_initials, response: Response):
     return JSONEncoder().encode(result)
 
 #возвращает инициалы преподаватели по его id
-@app.get("/teacher_initials")
+@app.get("/teacher_by_id")
 async def get_teacher_initials_handler(teacher_id,  response: Response):
     result = await teacher.get_teacher_initials(teacher_id)
     if result['status'] == '1':
