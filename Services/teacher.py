@@ -1,7 +1,7 @@
 from scheme import *
 from utils import *
-from English.english import *
-from Schedule.schedule import *
+from Services.english import *
+from Services.schedule import *
 # from DataBase.mongo import MongoRepository
 
 class Teacher:

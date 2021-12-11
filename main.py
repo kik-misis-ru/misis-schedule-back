@@ -2,11 +2,13 @@ from datetime import date
 from fastapi import FastAPI, Response, responses, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_500_INTERNAL_SERVER_ERROR
-from  DataBase.mongo import MongoRepository
-from Schedule.schedule import *
-from Teacher.teacher import *
-from Group.group import *
-from User.user import *
+
+
+from Services.schedule import *
+from Services.teacher import *
+from Services.group import *
+from Services.user import *
+from DataBase.mongo import MongoRepository
 from threading import Thread
 import asyncio
 from scheme import DataForPush

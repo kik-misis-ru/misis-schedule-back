@@ -1,6 +1,6 @@
 from starlette import status
 from scheme import *
-from Schedule.schedule import *
+from Services.schedule import *
 from DataBase.mongo import MongoRepository
 
 class User:
