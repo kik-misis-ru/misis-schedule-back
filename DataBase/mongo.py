@@ -18,7 +18,6 @@ class MongoRepository:
         client =  AsyncIOMotorClient(url)
         db = client.get_database("schedule")
         self.collection_schedule = db.get_collection("schedule")
-        self.collection_schedule_teacher = db.get_collection("schedule_teacher")
         self.collection_users = db.get_collection("users")
         self.collection_teachers = db.get_collection("teachers")
         self.collection_group_list = db.get_collection("group_list")
@@ -34,10 +33,8 @@ class MongoRepository:
         self.collection_schedule.insert_one(schedule)
 
     async def get_schedule_teacher(self, teacher_id, date_monday):
-        return await self.collection_schedule_teacher.find_one({"teacher_id": str(teacher_id), "start_date":str(date_monday)})
-    
-    def create_teacher_schedule(self, schedule):
-        self.collection_schedule_teacher.insert_one(schedule)
+        return await self.collection_schedule.find_one({"teacher_id": str(teacher_id), "start_date":str(date_monday)})
+
 
     async def find_user(self, user_id):
         return await self.collection_users.find_one({"user_id": user_id})
@@ -67,7 +64,7 @@ class MongoRepository:
             teacher_info['first_name']= teacher_info['first_name'][0]
             if teacher_info['mid_name']:
                 teacher_info['mid_name']= teacher_info['mid_name'][0]
-        self.collection_schedule_teacher.insert_many(teachers_info)
+        self.collection_teachers.insert_many(teachers_info)
 
     async def find_teacher(self, fio):
         #await self.collection_schedule.create_index("createdAt", expireAfterSeconds= 30)

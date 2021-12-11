@@ -32,15 +32,16 @@ class Schedule:
     async def get_teacher_schedule(self, teacher_id, date):
         date_monday =get_monday(date)
         response = await self.mongo_repository.get_schedule_teacher(teacher_id, date_monday)
-        if response:
-            response["createdAt"] = str(response["createdAt"])
-            return response
-        else:
-            schedule =get_schedule_teacher_from_api(teacher_id, date_monday)
-            schedule["createdAt"] = datetime.utcnow()
-            self.mongo_repository.create_teacher_schedule(schedule)
-            schedule["createdAt"] = str(datetime.utcnow())
-            return schedule
+        if not response:
+            schedule_from_api =get_schedule_teacher_from_api(teacher_id, date_monday)
+            response = formate_schedule(schedule_from_api)
+            if "schedule" not in response:
+                return {"status": "NOT FOUND"}
+            else:
+                self.mongo_repository.create_schedule(response)
+        response["createdAt"] = str(response["createdAt"])
+        response["status"] = "FOUND"
+        return response
 
     async def get_data_by_user_id(self, user_id: str):
         response = dict()

@@ -212,11 +212,14 @@ def get_user_info(response):
         result["teacher_id"]=""
     return result
 
+
+required_fields_in_schedule = ["start_date", "teacher_id", "group_id", "room_id", "schedule_header", "prev_date", "next_date"]
+
 #преобразует расписание, полученное из api к виду,
 #в котором оно хранится в базе данных
 def formate_schedule(schedule_from_api):
     schedule = dict()
-    if "":
+    if all(key in schedule_from_api for key in required_fields_in_schedule):
         schedule["createdAt"] = datetime.utcnow()
         schedule["start_date"] = schedule_from_api["start_date"]
         schedule["teacher_id"] = schedule_from_api["teacher_id"]
