@@ -30,7 +30,7 @@ def get_schedule_from_api(group_id, date_monday):
     req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
     if req.status_code !=200:
         response = dict()
-        response["sratus"] = "NOT FOUND"
+        response["status"] = "NOT FOUND"
         return response
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     schedule_json = json.loads(response)
@@ -47,7 +47,7 @@ def get_schedule_teacher_from_api(teacher_id, date_monday):
     req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
     if req.status_code !=200:
         response = dict()
-        response["sratus"] = "NOT FOUND"
+        response["status"] = "NOT FOUND"
         return response
     response = json.dumps(req.json(), indent=2, ensure_ascii=False)
     schedule_json = json.loads(response)
@@ -211,6 +211,22 @@ def get_user_info(response):
     else:
         result["teacher_id"]=""
     return result
+
+#преобразует расписание, полученное из api к виду,
+#в котором оно хранится в базе данных
+def formate_schedule(schedule_from_api):
+    schedule = dict()
+    if "":
+        schedule["createdAt"] = datetime.utcnow()
+        schedule["start_date"] = schedule_from_api["start_date"]
+        schedule["teacher_id"] = schedule_from_api["teacher_id"]
+        schedule["group_id"] = schedule_from_api["group_id"]
+        schedule["room_id"] = schedule_from_api["room_id"]
+        schedule_from_api["schedule_header"] = schedule_from_api["schedule_header"]
+        schedule["schedule"] = schedule_from_api["schedule"]
+        schedule["prev_date"] = schedule_from_api["prev_date"]
+        schedule["next_date"] = schedule_from_api["next_date"]
+    return schedule
 
 
 

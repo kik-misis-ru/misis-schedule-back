@@ -17,19 +17,17 @@ class Schedule:
     async def get_schedule(self, group_id, english_group_id, date):
         date_monday =  get_monday(date)
         response = await self.mongo_repository.get_schedule(group_id, date_monday)
-    
-        if response:
-            response = await  self.english.add_english_schedule(dict(response), english_group_id)
-            response["createdAt"] = str(response["createdAt"])
-            return response
-        else:
-            schedule = get_schedule_from_api(group_id, date_monday)
-            
-            schedule["createdAt"] = datetime.utcnow()
-            self.mongo_repository.create_schedule(schedule)
-            schedule_dict = await self.english.add_english_schedule(dict(schedule), english_group_id)
-            schedule_dict["createdAt"] = str(schedule["createdAt"])
-            return schedule_dict
+        if not response:
+            schedule_from_api = get_schedule_from_api(group_id, date_monday)
+            response = formate_schedule(schedule_from_api)
+            if "schedule" not in response:
+                return {"status": "NOT FOUND"}
+            else:
+                self.mongo_repository.create_schedule(response)
+        response = await  self.english.add_english_schedule(dict(response), english_group_id)
+        response["createdAt"] = str(response["createdAt"])
+        response["status"] = "FOUND"
+        return response
 
     async def get_teacher_schedule(self, teacher_id, date):
         date_monday =get_monday(date)
@@ -44,7 +42,7 @@ class Schedule:
             schedule["createdAt"] = str(datetime.utcnow())
             return schedule
 
-    async def get_schedule_by_user_id(self, user_id: str):
+    async def get_data_by_user_id(self, user_id: str):
         response = dict()
         user_response = await self.mongo_repository.find_user(user_id)
         if user_response:

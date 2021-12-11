@@ -73,8 +73,8 @@ async def get_user_handler(user_id: str, response: Response):
 
 #возврвщает расписание по id пользователя (используется при загрузке приложения)
 @app.get('/schedule_by_user_id')
-async def get_schedule_by_sub(user_id: str, response: Response):
-    result = await schedule.get_schedule_by_user_id(user_id)
+async def get_data_by_sub(user_id: str, response: Response):
+    result = await schedule.get_data_by_user_id(user_id)
     if result['status'] == "1":
         response.status_code = status.HTTP_200_OK
     else:
