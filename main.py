@@ -55,14 +55,14 @@ async  def get_schedule_teacher_json(teacher_id, date, response: Response):
 
 
 #создает пользователя или обновляет данные о сущетсвующем
-@app.post('/users')
+@app.post('/user')
 async def add_user_handler(_user: UserModel, response: Response):
     result = await user.add_user(_user)
     response.status_code = HTTP_201_CREATED
 
 
 #возращает данные о пользователе по его id
-@app.get('/users')
+@app.get('/user')
 async def get_user_handler(user_id: str, response: Response):
     result = await user.get_user(user_id)
     if result != "0":
@@ -72,7 +72,7 @@ async def get_user_handler(user_id: str, response: Response):
     return result
 
 #возврвщает расписание по id пользователя (используется при загрузке приложения)
-@app.get('/schedule_by_user_id')
+@app.get('/data_by_user_id')
 async def get_data_by_sub(user_id: str, response: Response):
     result = await schedule.get_data_by_user_id(user_id)
     if result['status'] == "1":
