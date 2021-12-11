@@ -225,7 +225,7 @@ def formate_schedule(schedule_from_api):
         schedule["teacher_id"] = schedule_from_api["teacher_id"]
         schedule["group_id"] = schedule_from_api["group_id"]
         schedule["room_id"] = schedule_from_api["room_id"]
-        schedule_from_api["schedule_header"] = schedule_from_api["schedule_header"]
+        schedule["schedule_header"] = schedule_from_api["schedule_header"]
         schedule["schedule"] = schedule_from_api["schedule"]
         schedule["prev_date"] = schedule_from_api["prev_date"]
         schedule["next_date"] = schedule_from_api["next_date"]
