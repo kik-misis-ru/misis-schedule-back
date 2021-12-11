@@ -56,7 +56,6 @@ class Schedule:
                 response["groupName"] = ""
             push_data = await self.mongo_repository.async_get_push_info_user(user_id)
             if push_data:
-                #response["push"] = dict()
                 response['isActive'] = push_data['isActive']
                 response['hour'] = push_data['hour']
                 response['minute'] = push_data['minute']
