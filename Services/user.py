@@ -1,3 +1,4 @@
+from datetime import date
 from starlette import status
 from scheme import *
 from Services.schedule import *
@@ -43,11 +44,13 @@ class User:
     async def get_subs_for_push(self, hour: int):
         subs =  self.mongo_repository.get_subs_for_push(hour)
         subslist = await subs.to_list(None)
+        response = dict()
         data = []
         for sub in subslist:
             del sub['_id']
             data.append(sub)
-        return data
+        response["data"] = data
+        return response
 
     async def get_data_for_push(self, sub):
         response = dict()
@@ -63,7 +66,7 @@ class User:
             response["day"] = "Завтра"
             response["count_lessons"] = 0
             response["lesson"] = "пар"
-            response["start_time"] = "0"
+            response["start_time"] = ""
             response["status"] = status_code_success
             return response
         if day_num==7:
@@ -87,6 +90,10 @@ class User:
                             start_time = schedule[bell]["header"]["start_lesson"]
         response["day"] = "Завтра"
         response["count_lessons"] = count_lessons
+        if count_lessons > 1:
+            response["start_lesson_info"] = "Первая начнется в "
+        else:
+            response["start_lesson_info"] = ""
         if count_lessons == 1:
             response["lesson"] = "пара"
         elif count_lessons in (2,3,4):
