@@ -33,7 +33,6 @@ group = Group(mongo_repository)
 auth = Auth(mongo_repository)
 
 
-
 #возвращает расписание по дате, id-группы и id-группы по английскому
 @app.get('/schedule')
 async def get_schedule_json(group_id, english_group_id, date, response: Response,  _: User = Depends(auth.get_current_user)):

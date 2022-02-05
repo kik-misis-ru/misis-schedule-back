@@ -45,6 +45,7 @@ def get_schedule_teacher_from_api(teacher_id, date_monday):
             'start_date':date_monday
         }
     req = requests.post('https://login.misis.ru/method/schedule.get', data=data)
+    print(req.status_code)
     if req.status_code !=200:
         response = dict()
         response["status"] = "NOT FOUND"

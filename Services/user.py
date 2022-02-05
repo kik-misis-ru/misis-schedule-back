@@ -68,6 +68,7 @@ class User:
             response["lesson"] = "пар"
             response["start_time"] = ""
             response["status"] = status_code_success
+            response["start_lesson_info"] =""
             return response
         if day_num==7:
             day_num = 0
