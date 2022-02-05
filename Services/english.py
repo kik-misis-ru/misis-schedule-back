@@ -32,7 +32,17 @@ class English:
         gc = gspread.service_account(filename='creds.json')
         course_number = int(group_id[0])
         if course_number<=0 or course_number>4:
+            for course in range(4):
+                schedule = self.find_schedule_in_couse_file(course, group_id, gc)
+                if schedule != -1:
+                    return schedule
             return -1
+        else:
+            return self.find_schedule_in_couse_file(course_number, group_id, gc)
+        
+
+    #поиск нужного расписания в файле для конкретного курса
+    def find_schedule_in_couse_file(self, course_number: int, group_id: int, gc):
         google_sheet_file = self.google_sheets_files[course_number-1]
         sh = gc.open_by_key(google_sheet_file)
         nums = [str(i) for i in range(1,32)]
@@ -41,10 +51,19 @@ class English:
             for row in table[4:]:
                 if(len(row)==0):
                     continue
-                if row[0] not in nums:
-                    for i in range(0, len(row), 3):
+                is_row_group = False
+                start_group_column = 0
+                for i in range(0,len(row),3):
+                    if i< len(row)-3:
+                        if row[i] not in nums:
+                            is_row_group = True
+                            start_group_column=i
+                            break
+                if is_row_group:
+                    for i in range(start_group_column, len(row), 3):
                         if row[i] and len(row[i])>2:
                             group = row[i].split(' ')[0].strip()
+                            print(group)
                             if(str(group)==str(group_id) and len(row)>i+2):
                                 teacher = row[i + 1].strip()
                                 teacher=formate_teacher_initials(teacher)

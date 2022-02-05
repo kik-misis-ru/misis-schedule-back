@@ -23,6 +23,7 @@ class MongoRepository:
         self.collection_group_list = db.get_collection("group_list")
         self.collection_english_group_list = db.get_collection("english_group_list")
         self.collection_users_with_push = db.get_collection("users_with_push")
+        self.collection_auth = db.get_collection("auth")
 
     async def get_schedule(self, group_id, date_monday):
         print("groud_id", group_id)
@@ -127,3 +128,9 @@ class MongoRepository:
 
     def async_get_push_info_user(self, sub: str):
         return self.collection_users_with_push.find_one({'sub': sub}) 
+
+    async  def get_auth_user(self, username: str):
+        return await self.collection_auth.find_one({'username': username})
+    
+    async def sign_in(self, username: str, password_hashed: str):
+        return await self.collection_auth.find_onr({'username': username, "hashed_password": password_hashed})
