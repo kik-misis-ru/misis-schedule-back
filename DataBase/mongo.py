@@ -24,6 +24,8 @@ class MongoRepository:
         self.collection_english_group_list = db.get_collection("english_group_list")
         self.collection_users_with_push = db.get_collection("users_with_push")
 
+        #self.collection_schedule.create_index("createdAt", expireAfterSeconds= 3600)
+
     async def get_schedule(self, group_id, date_monday):
         print("groud_id", group_id)
         print("datw_monday", date_monday)

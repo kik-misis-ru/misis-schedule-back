@@ -1,6 +1,7 @@
 from datetime import date
 from fastapi import FastAPI, Response, responses, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_500_INTERNAL_SERVER_ERROR
 
 
@@ -29,7 +30,6 @@ schedule = Schedule(mongo_repository)
 user = User(mongo_repository)
 teacher = Teacher(mongo_repository)
 group = Group(mongo_repository)
-
 
 
 
