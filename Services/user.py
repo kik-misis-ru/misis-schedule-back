@@ -78,7 +78,7 @@ class User:
             scheduleData = await self.schedule.get_teacher_schedule(teacher_id, current_date.strftime("%Y-%m-%d"))
         else:
             group_id = user_data["group_id"]
-            scheduleData = await self.schedule.get_schedule(group_id, "",  datetime.today().strftime("%Y-%m-%d"))
+            scheduleData = await self.schedule.get_schedule(group_id, "",  current_date.strftime("%Y-%m-%d"))
         day_schedule = Days[day_num] 
         if scheduleData and "status" in scheduleData and scheduleData["status"] == "FOUND":
             schedule = scheduleData["schedule"]
