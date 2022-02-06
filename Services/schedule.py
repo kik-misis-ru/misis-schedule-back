@@ -49,6 +49,7 @@ class Schedule:
         if user_response:
             response["status"] = status_code_success
             response["eng_group"] = user_response ["eng_group"]
+            response["subgroup_name"] = user_response["subgroup_name"]
             if user_response["group_id"]!="":
                 group = await self.mongo_repository.get_group_by_id(user_response["group_id"])
                 response["groupName"] = group["name"]
