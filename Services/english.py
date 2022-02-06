@@ -132,7 +132,13 @@ class English:
                 for row in table[4:]:
                     if(len(row)==0):
                         continue
-                    if row[0] not in nums:
+                    is_row_group = False
+                    for i in range(0,len(row),3):
+                        if i< len(row)-3:
+                            if row[i] not in nums:
+                                is_row_group = True
+                                break
+                    if is_row_group:
                         for i in range(0, len(row), 3):
                             if row[i] and len(row[i])>2:
                                 group = row[i].split(' ')[0].strip()

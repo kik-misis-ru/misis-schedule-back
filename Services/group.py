@@ -60,7 +60,7 @@ class Group:
                 response["status"] = status_code_error
                 return response
         groups = self.english.get_all_english_groups()
-        if len(groups):
+        if not len(groups):
             response["status"] = status_code_error
             return response
         insert_result = await self.mongo_repository.create_english_groups(groups)
